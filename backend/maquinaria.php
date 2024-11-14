@@ -4,110 +4,102 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "Constructora";
+class Database {
+    private $host = "localhost";
+    private $db_name = "constructora";
+    private $username = "root";
+    private $password = "";
+    public $conn;
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(["error" => "Conexión fallida a la base de datos."]));
+    public function getConnection() {
+        $this->conn = null;
+        try {
+            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+            $this->conn->exec("set names utf8");
+        } catch(PDOException $exception) {
+            echo json_encode(["message" => "Error de conexión: " . $exception->getMessage()]);
+        }
+        return $this->conn;
+    }
 }
 
+// Obtener conexión a la base de datos
+$database = new Database();
+$db = $database->getConnection();
+
+// Leer el método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($method == 'GET') {
-    $sql = "SELECT * FROM Maquinaria";
-    $result = $conn->query($sql);
+// Decodificar JSON en caso de recibir datos
+$data = json_decode(file_get_contents("php://input"));
 
-    $maquinaria = [];
-    while ($row = $result->fetch_assoc()) {
-        $maquinaria[] = $row;
-    }
-
-    echo json_encode($maquinaria);
-}
-
-if ($method == 'POST') {
-    $data = json_decode(file_get_contents("php://input"), true);
-
-    // Verificar que todos los campos necesarios estén presentes en $data
-    if (
-        isset($data['nombre'], $data['descripcion'], $data['tipo'], $data['estado'], 
-              $data['fecha_adquisicion'], $data['costo'])
-    ) {
-        $stmt = $conn->prepare("INSERT INTO Maquinaria (nombre, descripcion, tipo, estado, fecha_adquisicion, costo) VALUES (?, ?, ?, ?, ?, ?)");
-        // Usar "d" para valores decimales como costo
-        $stmt->bind_param("sssssd", $data['nombre'], $data['descripcion'], $data['tipo'], $data['estado'], $data['fecha_adquisicion'], $data['costo']);
-
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Maquinaria creada exitosamente."]);
+// Definir el comportamiento basado en el método HTTP
+switch ($method) {
+    case 'POST':
+        // CREATE - Crear un nuevo registro
+        if (!empty($data->nombre) && !empty($data->estado)) {
+            $query = "INSERT INTO maquinaria (nombre, descripcion, estado, fecha_adquisicion, costo, tipo) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $db->prepare($query);
+            if ($stmt->execute([$data->nombre, $data->descripcion, $data->estado, $data->fecha_adquisicion, $data->costo, $data->tipo])) {
+                echo json_encode(["message" => "Registro creado correctamente."]);
+            } else {
+                echo json_encode(["message" => "Error al crear el registro."]);
+            }
         } else {
-            echo json_encode(["error" => "Error al crear maquinaria."]);
+            echo json_encode(["message" => "Faltan datos obligatorios."]);
         }
-        $stmt->close();
-    } else {
-        echo json_encode(["error" => "Datos incompletos"]);
-    }
-}
+        break;
 
-if ($method == 'PUT') {
-    $data = json_decode(file_get_contents("php://input"), true);
-
-    // Verificamos si todos los datos necesarios están presentes
-    if (
-        isset($data['nombre'], $data['descripcion'], $data['tipo'], $data['estado'], 
-              $data['fecha_adquisicion'], $data['costo'], $data['maquinaria_id'])
-    ) {
-        // Preparamos la consulta SQL para actualizar la maquinaria
-        $stmt = $conn->prepare("UPDATE Maquinaria SET nombre=?, descripcion=?, tipo=?, estado=?, fecha_adquisicion=?, costo=? WHERE maquinaria_id=?");
-
-        // Vinculamos los parámetros a la consulta preparada
-        $stmt->bind_param(
-            "ssssddi", 
-            $data['nombre'], 
-            $data['descripcion'], 
-            $data['tipo'], 
-            $data['estado'], 
-            $data['fecha_adquisicion'], 
-            $data['costo'], 
-            $data['maquinaria_id']
-        );
-
-        // Ejecutamos la consulta y verificamos si tuvo éxito
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Maquinaria actualizada exitosamente."]);
+    case 'GET':
+        // READ - Obtener todos los registros o uno en específico
+        if (isset($_GET['maquinaria_id'])) {
+            $query = "SELECT * FROM maquinaria WHERE maquinaria_id = ?";
+            $stmt = $db->prepare($query);
+            $stmt->execute([$_GET['maquinaria_id']]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            echo json_encode($result ? $result : ["message" => "Registro no encontrado."]);
         } else {
-            echo json_encode(["error" => "Error al actualizar maquinaria."]);
+            $query = "SELECT * FROM maquinaria";
+            $stmt = $db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($result);
         }
+        break;
 
-        // Cerramos la declaración
-        $stmt->close();
-    } else {
-        echo json_encode(["error" => "Datos incompletos para actualizar maquinaria"]);
-    }
-}
-
-
-
-
-if ($method == 'DELETE') {
-    $input = json_decode(file_get_contents("php://input"), true);
-    $maquinaria_id = $input['maquinaria_id'] ?? null;
-
-    if ($maquinaria_id) {
-        $stmt = $conn->prepare("DELETE FROM Maquinaria WHERE maquinaria_id = ?");
-        $stmt->bind_param("i", $maquinaria_id);
-
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Maquinaria eliminada correctamente"]);
+    case 'PUT':
+        // UPDATE - Actualizar un registro existente
+        if (!empty($data->maquinaria_id) && !empty($data->nombre) && !empty($data->estado)) {
+            $query = "UPDATE maquinaria SET nombre = ?, descripcion = ?, estado = ?, fecha_adquisicion = ?, costo = ?, tipo = ? WHERE maquinaria_id = ?";
+            $stmt = $db->prepare($query);
+            if ($stmt->execute([$data->nombre, $data->descripcion, $data->estado, $data->fecha_adquisicion, $data->costo, $data->tipo, $data->maquinaria_id])) {
+                echo json_encode(["message" => "Registro actualizado correctamente."]);
+            } else {
+                echo json_encode(["message" => "Error al actualizar el registro."]);
+            }
         } else {
-            echo json_encode(["error" => "Error al eliminar maquinaria"]);
+            echo json_encode(["message" => "Faltan datos obligatorios."]);
         }
-        $stmt->close();
-    } else {
-        echo json_encode(["error" => "ID de maquinaria no proporcionado"]);
-    }
-}
+        break;
 
-$conn->close();
+    case 'DELETE':
+        // DELETE - Eliminar un registro
+        if (!empty($data->maquinaria_id)) {
+            $query = "DELETE FROM maquinaria WHERE maquinaria_id = ?";
+            $stmt = $db->prepare($query);
+            if ($stmt->execute([$data->maquinaria_id])) {
+                echo json_encode(["message" => "Registro eliminado correctamente."]);
+            } else {
+                echo json_encode(["message" => "Error al eliminar el registro."]);
+            }
+        } else {
+            echo json_encode(["message" => "ID de maquinaria requerido."]);
+        }
+        break;
+
+    default:
+        // Método no soportado
+        echo json_encode(["message" => "Método no permitido."]);
+        break;
+}
+?>

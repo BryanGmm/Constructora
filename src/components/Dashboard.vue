@@ -33,6 +33,12 @@
           </router-link>
         </li>
       </ul>
+      <!-- Ícono de cerrar sesión -->
+      <div class="navbar__logout">
+        <a href="#" @click.prevent="logout" class="navbar__link">
+          <i data-feather="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
     </nav>
     <div class="contenido">
       <router-view /> <!-- Aquí se mostrarán las vistas cargadas -->
@@ -42,14 +48,28 @@
 
 <script>
 import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import feather from 'feather-icons';
 
 export default {
   name: 'AppDashboard',
   setup() {
+    const router = useRouter();
+
+    const logout = () => {
+      // Eliminar datos del usuario almacenados (por ejemplo, en localStorage)
+      localStorage.removeItem('usuario');
+      // Redirigir a la página de inicio de sesión
+      router.push('/login');
+    };
+
     onMounted(() => {
       feather.replace();
     });
+
+    return {
+      logout,
+    };
   },
 };
 </script>
@@ -79,6 +99,10 @@ $transition: $timing ease all;
   left: 0;
   top: 0;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .contenido {
@@ -95,6 +119,13 @@ $transition: $timing ease all;
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.navbar__item {
+  width: 100%;
 }
 
 .navbar__link {
@@ -133,6 +164,26 @@ $transition: $timing ease all;
   }
 }
 
+/* Botón de cerrar sesión */
+.navbar__logout {
+  width: 100%; /* Ocupa el ancho completo */
+  padding: $spacer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar__logout .navbar__link {
+  width: $spacer * 5.5;
+  justify-content: center;
+  color: $text;
+
+  &:hover {
+    color: #c55151;
+    background-color: #10224e;
+  }
+}
+
 /* Media Query para dispositivos móviles */
 @media (max-width: 768px) {
   .dashboard-layout {
@@ -144,12 +195,19 @@ $transition: $timing ease all;
     width: 100%;
     height: auto;
     position: relative;
+    flex-direction: row;
+    justify-content: flex-start;
   }
 
   .navbar__menu {
     display: flex;
     flex-direction: row;
     overflow-x: auto;
+    flex-grow: 1;
+  }
+
+  .navbar__logout {
+    padding: 0;
   }
 
   .navbar__link {
