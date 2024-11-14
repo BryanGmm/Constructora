@@ -35,8 +35,8 @@ if ($method == 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
     $imagen = isset($data['imagen']) ? base64_decode($data['imagen']) : null;
 
-    $stmt = $conn->prepare("INSERT INTO Proyectos (nombre, descripcion, ubicacion, fecha_inicio, fecha_fin, fecha_reprogramada, estado, porcentaje_avance, inversion_inicial, inversion_final, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssssssd", $data['nombre'], $data['descripcion'], $data['ubicacion'], $data['fecha_inicio'], $data['fecha_fin'], $data['fecha_reprogramada'], $data['estado'], $data['porcentaje_avance'], $data['inversion_inicial'], $data['inversion_final'], $imagen);
+    $stmt = $conn->prepare("INSERT INTO Proyectos (nombre, descripcion, ubicacion, fecha_inicio, fecha_fin, fecha_reprogramada, estado, inversion_inicial, inversion_final, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssssd", $data['nombre'], $data['descripcion'], $data['ubicacion'], $data['fecha_inicio'], $data['fecha_fin'], $data['fecha_reprogramada'], $data['estado'], $data['inversion_inicial'], $data['inversion_final'], $imagen);
 
     if ($stmt->execute()) {
         echo json_encode(["message" => "Proyecto creado exitosamente."]);
@@ -46,29 +46,44 @@ if ($method == 'POST') {
     $stmt->close();
 }
 
-if ($method == 'PUT') {
-    $data = json_decode(file_get_contents("php://input"), true);
+if ($method == 'PUT' && isset($_GET['update_percentage'])) {
+    $proyecto_id = $_GET['proyecto_id'] ?? null;
 
-    // Verificamos si la imagen está presente en los datos recibidos
-    $imagen = isset($data['imagen']) ? base64_decode($data['imagen']) : null;
+    if ($proyecto_id) {
+        // Obtener el total de tareas y las tareas completadas para el proyecto
+        $sqlTotal = "SELECT COUNT(*) as total FROM tareas_proyecto WHERE proyecto_id = ?";
+        $stmtTotal = $conn->prepare($sqlTotal);
+        $stmtTotal->bind_param("i", $proyecto_id);
+        $stmtTotal->execute();
+        $resultTotal = $stmtTotal->get_result();
+        $totalTareas = $resultTotal->fetch_assoc()['total'];
+        $stmtTotal->close();
 
-    // Construimos la consulta SQL condicionalmente
-    if ($imagen !== null) {
-        $stmt = $conn->prepare("UPDATE Proyectos SET nombre=?, descripcion=?, ubicacion=?, fecha_inicio=?, fecha_fin=?, fecha_reprogramada=?, estado=?, porcentaje_avance=?, inversion_inicial=?, inversion_final=?, imagen=? WHERE proyecto_id=?");
-        $stmt->bind_param("sssssssssssi", $data['nombre'], $data['descripcion'], $data['ubicacion'], $data['fecha_inicio'], $data['fecha_fin'], $data['fecha_reprogramada'], $data['estado'], $data['porcentaje_avance'], $data['inversion_inicial'], $data['inversion_final'], $imagen, $data['proyecto_id']);
+        $sqlCompleted = "SELECT COUNT(*) as completed FROM tareas_proyecto WHERE proyecto_id = ? AND completada = 1";
+        $stmtCompleted = $conn->prepare($sqlCompleted);
+        $stmtCompleted->bind_param("i", $proyecto_id);
+        $stmtCompleted->execute();
+        $resultCompleted = $stmtCompleted->get_result();
+        $tareasCompletadas = $resultCompleted->fetch_assoc()['completed'];
+        $stmtCompleted->close();
+
+        // Calcular el porcentaje de avance
+        $porcentajeAvance = $totalTareas > 0 ? round(($tareasCompletadas / $totalTareas) * 100) : 0;
+
+        // Actualizar el porcentaje de avance en la tabla Proyectos
+        $stmtUpdate = $conn->prepare("UPDATE Proyectos SET porcentaje_avance = ? WHERE proyecto_id = ?");
+        $stmtUpdate->bind_param("ii", $porcentajeAvance, $proyecto_id);
+        if ($stmtUpdate->execute()) {
+            echo json_encode(["message" => "Porcentaje de avance actualizado exitosamente.", "porcentaje_avance" => $porcentajeAvance]);
+        } else {
+            echo json_encode(["error" => "Error al actualizar el porcentaje de avance."]);
+        }
+        $stmtUpdate->close();
     } else {
-        // Si no hay imagen, omitimos el campo imagen en la actualización
-        $stmt = $conn->prepare("UPDATE Proyectos SET nombre=?, descripcion=?, ubicacion=?, fecha_inicio=?, fecha_fin=?, fecha_reprogramada=?, estado=?, porcentaje_avance=?, inversion_inicial=?, inversion_final=? WHERE proyecto_id=?");
-        $stmt->bind_param("ssssssssssi", $data['nombre'], $data['descripcion'], $data['ubicacion'], $data['fecha_inicio'], $data['fecha_fin'], $data['fecha_reprogramada'], $data['estado'], $data['porcentaje_avance'], $data['inversion_inicial'], $data['inversion_final'], $data['proyecto_id']);
+        echo json_encode(["error" => "ID de proyecto no proporcionado"]);
     }
-
-    if ($stmt->execute()) {
-        echo json_encode(["message" => "Proyecto actualizado exitosamente."]);
-    } else {
-        echo json_encode(["error" => "Error al actualizar proyecto."]);
-    }
-    $stmt->close();
 }
+
 
 if ($method == 'DELETE') {
     $input = json_decode(file_get_contents("php://input"), true);

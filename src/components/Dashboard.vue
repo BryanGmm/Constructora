@@ -9,7 +9,7 @@
         </li>
         <li class="navbar__item">
           <router-link to="/gestion-usuarios" class="navbar__link">
-            <i data-feather="users"></i><span>Gestión Usuarios</span>
+            <i data-feather="user"></i><span>Gestión Usuarios</span>
           </router-link>
         </li>
         <li class="navbar__item">
@@ -19,21 +19,25 @@
         </li>
         <li class="navbar__item">
           <router-link to="/gestion-maquinaria" class="navbar__link">
-            <i data-feather="settings"></i><span>Gestión Maquinaria</span>
+            <i data-feather="tool"></i><span>Gestión Maquinaria</span>
           </router-link>
         </li>
         <li class="navbar__item">
           <router-link to="/gestion-proyectos" class="navbar__link">
-            <i data-feather="folder"></i><span>Gestión Proyectos</span>
+            <i data-feather="briefcase"></i><span>Gestión Proyectos</span>
           </router-link>
         </li>
         <li class="navbar__item">
           <router-link to="/gestion-clientes" class="navbar__link">
-            <i data-feather="folder"></i><span>Gestión Clientes</span>
+            <i data-feather="users"></i><span>Gestión Clientes</span>
+          </router-link>
+        </li>
+        <li class="navbar__item">
+          <router-link to="/materiaPrima" class="navbar__link">
+            <i data-feather="box"></i><span>Materia Prima</span>
           </router-link>
         </li>
       </ul>
-      <!-- Ícono de cerrar sesión -->
       <div class="navbar__logout">
         <a href="#" @click.prevent="logout" class="navbar__link">
           <i data-feather="log-out"></i><span>Cerrar Sesión</span>

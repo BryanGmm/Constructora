@@ -23,10 +23,11 @@
 
                     <label class="block mb-2">Contraseña</label>
                     <input v-model="usuario.password" type="password" class="w-full mb-4 border rounded p-2"
-                        :required="!modoEdicion" />
+                        :disabled="modoEdicion" />
 
                     <label class="block mb-2">Rol</label>
                     <select v-model="usuario.rol_id" class="w-full mb-4 border rounded p-2" required>
+                        <option value="" disabled>Seleccione un rol</option> <!-- Placeholder -->
                         <option v-for="rol in roles" :key="rol.rol_id" :value="rol.rol_id">{{ rol.nombre }}</option>
                     </select>
 
@@ -157,7 +158,8 @@ export default {
                 });
         },
         cargarUsuario(user) {
-            this.usuario = { ...user, password: "" };
+            this.usuario = { ...user, password: "" }; // Limpia la contraseña para no mostrarla
+            this.usuario.rol_id = user.rol_id; // Asegúrate de que rol_id esté presente
             this.modoEdicion = true;
             this.mostrarModal = true;
         },

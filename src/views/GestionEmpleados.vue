@@ -42,7 +42,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ empleado.email }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ empleado.telefonos ? empleado.telefonos.split(', ')[0] : 'No registrado' }}
+                {{ empleado.telefonos ? empleado.telefonos.split(',')[0] : 'No registrado' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button @click.stop="editarEmpleado(empleado)"
@@ -119,69 +119,77 @@
         </div>
       </div>
 
-      <div v-if="mostrarModalEmpleado" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl p-6"> <!-- max-w-lg cambiado a max-w-2xl para mayor ancho -->
-    <!-- Header del Modal -->
-    <div class="flex items-center justify-between border-b pb-4 mb-4">
-      <h3 class="text-2xl font-bold text-gray-800">Información del Empleado</h3>
-      <button @click="mostrarModalEmpleado = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
+      <div v-if="mostrarModalEmpleado"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl p-6">
+          <!-- max-w-lg cambiado a max-w-2xl para mayor ancho -->
+          <!-- Header del Modal -->
+          <div class="flex items-center justify-between border-b pb-4 mb-4">
+            <h3 class="text-2xl font-bold text-gray-800">Información del Empleado</h3>
+            <button @click="mostrarModalEmpleado = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
 
-    <!-- Contenido del Modal -->
-    <div class="space-y-6">
-      <!-- Información General -->
-      <div class="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
-        <!-- Nombre -->
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Nombre</p>
-          <p class="text-lg font-medium text-gray-800">{{ empleadoSeleccionado.nombre }}</p>
-        </div>
+          <!-- Contenido del Modal -->
+          <div class="space-y-6">
+            <!-- Información General -->
+            <div class="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
+              <!-- Nombre -->
+              <div>
+                <p class="text-sm font-semibold text-gray-500 uppercase">Nombre</p>
+                <p class="text-lg font-medium text-gray-800">{{ empleadoSeleccionado.nombre }}</p>
+              </div>
 
-        <!-- Puesto -->
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Puesto</p>
-          <p class="text-lg font-medium text-gray-800">{{ getPuestoNombre(empleadoSeleccionado.puesto_id) }}</p>
-        </div>
+              <!-- Puesto -->
+              <div>
+                <p class="text-sm font-semibold text-gray-500 uppercase">Puesto</p>
+                <p class="text-lg font-medium text-gray-800">{{ getPuestoNombre(empleadoSeleccionado.puesto_id) }}</p>
+              </div>
 
-        <!-- Salario -->
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Salario</p>
-          <p class="text-lg font-medium text-gray-800">${{ empleadoSeleccionado.salario.toLocaleString() }}</p>
-        </div>
+              <!-- Salario -->
+              <div>
+                <p class="text-sm font-semibold text-gray-500 uppercase">Salario</p>
+                <p class="text-lg font-medium text-gray-800">${{ empleadoSeleccionado.salario.toLocaleString() }}</p>
+              </div>
 
-        <!-- Email (ocupando toda la fila) -->
-        <div class="col-span-">
-          <p class="text-sm font-semibold text-gray-500 uppercase">Email</p>
-          <p class="text-lg font-medium text-gray-800">{{ empleadoSeleccionado.email }}</p>
+              <!-- Email (ocupando toda la fila) -->
+              <div class="col-span-">
+                <p class="text-sm font-semibold text-gray-500 uppercase">Email</p>
+                <p class="text-lg font-medium text-gray-800">{{ empleadoSeleccionado.email }}</p>
+              </div>
+            </div>
+
+            <!-- Lista de Teléfonos -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Teléfonos</p>
+              <ul class="space-y-2">
+                <li
+                  v-for="telefono in (empleadoSeleccionado.telefonos ? empleadoSeleccionado.telefonos.split(',') : [])"
+                  :key="telefono" class="flex items-center space-x-2">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 10h2l1-2 1.4-2.4c.5-.9 1.7-.9 2.1 0L12 10h4l1-2 1.4-2.4c.5-.9 1.7-.9 2.1 0L21 8h2"></path>
+                  </svg>
+                  <span class="text-gray-800 text-md">{{ telefono }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Footer del Modal -->
+          <div class="mt-6 flex justify-end">
+            <button @click="mostrarModalEmpleado = false"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- Lista de Teléfonos -->
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Teléfonos</p>
-        <ul class="space-y-2">
-          <li v-for="telefono in (empleadoSeleccionado.telefonos ? empleadoSeleccionado.telefonos.split(', ') : [])" :key="telefono" class="flex items-center space-x-2">
-            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h2l1-2 1.4-2.4c.5-.9 1.7-.9 2.1 0L12 10h4l1-2 1.4-2.4c.5-.9 1.7-.9 2.1 0L21 8h2"></path>
-            </svg>
-            <span class="text-gray-800 text-md">{{ telefono }}</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Footer del Modal -->
-    <div class="mt-6 flex justify-end">
-      <button @click="mostrarModalEmpleado = false" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-        Cerrar
-      </button>
-    </div>
-  </div>
-</div>
 
 
       <!-- Modal para Añadir Teléfono -->
@@ -272,14 +280,14 @@ export default {
       this.mostrarModal = false;
     },
     crearEmpleado() {
-      axios.post('http://localhost/GestionConstructora/backend/empleados.php', this.empleadoData)
-        .then(response => {
-          console.log("Empleado creado:", response.data);
-          this.obtenerEmpleados();
-          this.resetFormulario();
-        })
-        .catch(error => console.error("Error al crear empleado:", error));
-    },
+  axios.post('http://localhost/GestionConstructora/backend/empleados.php', this.empleadoData)
+    .then(response => {
+      console.log("Empleado creado:", response.data);
+      this.obtenerEmpleados();
+      this.resetFormulario();
+    })
+    .catch(error => console.error("Error al crear empleado:", error));
+},
     editarEmpleado(empleado) {
       this.empleadoData = { ...empleado, telefono: '' };
       this.empleadoEdit = true;

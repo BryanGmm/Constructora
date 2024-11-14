@@ -33,7 +33,15 @@
               <td class="px-6 py-4 text-sm">
                 <span :class="badgeClass(proyecto.estado)" class="px-2 py-1 rounded-full">{{ estados[proyecto.estado] }}</span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ proyecto.porcentaje_avance }}%</td>
+              <td class="px-6 py-4 text-sm text-gray-700">
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                  <div
+                    class="bg-blue-600 h-4 rounded-full"
+                    :style="{ width: `${proyecto.porcentaje_avance}%` }"
+                  ></div>
+                </div>
+                <span class="text-sm text-gray-700">{{ proyecto.porcentaje_avance }}%</span>
+              </td>              
               <td class="px-6 py-4 text-sm text-gray-700">{{ proyecto.fecha_inicio }}</td>
               <td class="px-6 py-4 text-sm text-gray-700">{{ formatCurrency(proyecto.inversion_inicial) }}</td>
               <td class="px-6 py-4 text-sm font-medium space-x-2">
@@ -85,10 +93,7 @@
                   <option value="PF">Proyecto Finalizado</option>
                 </select>
               </div>
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Porcentaje de Avance</label>
-                <input v-model="proyecto.porcentaje_avance" type="number" min="0" max="100" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" />
-              </div>
+              
               <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Inversión Inicial</label>
                 <input v-model="proyecto.inversion_inicial" type="number" min="0" step="0.01" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" />
@@ -108,33 +113,136 @@
 
       <!-- Modal de Detalles del Proyecto -->
       <div v-if="mostrarDetalles" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-2xl">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
           <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
             <h2 class="text-2xl font-semibold text-gray-800">Detalles del Proyecto</h2>
             <button @click="cerrarDetalles" class="text-gray-500 hover:text-gray-800">×</button>
           </div>
-          <div class="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-            <img v-if="proyectoSeleccionado.imagen" :src="proyectoSeleccionado.imagen" alt="Imagen del proyecto" class="w-full h-64 object-cover rounded-lg mb-4">
+
+          <!-- Contenedor desplazable -->
+          <div class="px-6 py-4 overflow-y-auto flex-1">
+            <img
+              v-if="proyectoSeleccionado.imagen"
+              :src="proyectoSeleccionado.imagen"
+              alt="Imagen del proyecto"
+              class="w-full h-64 object-cover rounded-lg mb-4"
+            />
             <div v-else class="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500 mb-4">
               <span>Sin Imagen</span>
             </div>
+            
+            <!-- Barra de progreso debajo de la imagen -->
+            <div class="w-full bg-gray-200 rounded-full h-6 mb-4">
+              <div
+                class="bg-blue-600 h-6 rounded-full"
+                :style="{ width: `${proyectoSeleccionado.porcentaje_avance}%` }"
+              ></div>
+            </div>
+            <p class="text-center text-sm font-medium text-gray-700 mb-4">
+              {{ proyectoSeleccionado.porcentaje_avance }}%
+            </p>
+            
+            <!-- Detalles del proyecto -->
             <p class="text-gray-600 mb-2"><strong>Nombre:</strong> {{ proyectoSeleccionado.nombre }}</p>
             <p class="text-gray-600 mb-2"><strong>Descripción:</strong> {{ proyectoSeleccionado.descripcion }}</p>
             <p class="text-gray-600 mb-2"><strong>Ubicación:</strong> {{ proyectoSeleccionado.ubicacion }}</p>
             <p class="text-gray-600 mb-2"><strong>Fecha de Inicio:</strong> {{ proyectoSeleccionado.fecha_inicio }}</p>
             <p class="text-gray-600 mb-2"><strong>Fecha de Fin:</strong> {{ proyectoSeleccionado.fecha_fin }}</p>
-            <p class="text-gray-600 mb-2"><strong>Avance:</strong> {{ proyectoSeleccionado.porcentaje_avance }}%</p>
             <p class="text-gray-600 mb-2"><strong>Inversión Inicial:</strong> {{ formatCurrency(proyectoSeleccionado.inversion_inicial) }}</p>
             <p class="text-gray-600 mb-2"><strong>Inversión Final:</strong> {{ formatCurrency(proyectoSeleccionado.inversion_final) }}</p>
             <p class="text-gray-600"><strong>Estado:</strong> <span :class="badgeClass(proyectoSeleccionado.estado)" class="px-2 py-1 rounded-full">{{ estados[proyectoSeleccionado.estado] }}</span></p>
+            
+             <!-- Lista de Tareas con botones de Editar y Eliminar -->
+              <h3 class="mt-6 text-xl font-semibold text-gray-800">Tareas del Proyecto</h3>
+              <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+                <ul>
+                  <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
+                      <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
+                        {{ tarea.completada ? 'Completada' : 'Incompleta' }}
+                      </span>
+                      <!-- Botón de Editar -->
+                      <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
+                      <!-- Botón de Eliminar -->
+                      <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+                    </div>
+                  </li>
+                </ul>
+              </div>
           </div>
-          <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end">
+
+          <!-- Barra de botones que se mantiene fija -->
+          <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between">
             <button @click="cerrarDetalles" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cerrar</button>
+            <button @click="abrirModalTarea(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Agregar Tarea</button>
           </div>
         </div>
       </div>
+
+
+
+     <!-- Modal para crear tarea -->
+    <div v-if="mostrarModalTarea" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Nueva Tarea</h2>
+        </div>
+        <div class="px-6 py-4">
+          <form @submit.prevent="crearTarea" class="space-y-4">
+            <div class="space-y-2">
+              <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre de la Tarea</label>
+              <input v-model="tarea.nombre" type="text" id="nombre" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+            </div>
+            <div class="space-y-2">
+              <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
+              <textarea v-model="tarea.descripcion" id="descripcion" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"></textarea>
+            </div>
+            <div class="flex items-center space-x-2">
+              <input type="checkbox" v-model="tarea.completada" id="completada" class="rounded text-blue-600 focus:ring-blue-500">
+              <label for="completada" class="text-sm font-medium text-gray-700">Completada</label>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button type="button" @click="mostrarModalTarea = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+              <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Crear Tarea</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-  </div>
+    <!-- Modal para editar tarea -->
+    <div v-if="mostrarModalEditarTarea" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Editar Tarea</h2>
+        </div>
+        <div class="px-6 py-4">
+          <form @submit.prevent="actualizarTarea" class="space-y-4">
+            <div class="space-y-2">
+              <label for="nombre-editar" class="block text-sm font-medium text-gray-700">Nombre de la Tarea</label>
+              <input v-model="tareaSeleccionada.nombre" type="text" id="nombre-editar" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+            </div>
+            <div class="space-y-2">
+              <label for="descripcion-editar" class="block text-sm font-medium text-gray-700">Descripción</label>
+              <textarea v-model="tareaSeleccionada.descripcion" id="descripcion-editar" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"></textarea>
+            </div>
+            <div class="flex items-center space-x-2">
+              <input type="checkbox" v-model="tareaSeleccionada.completada" id="completada-editar" class="rounded text-blue-600 focus:ring-blue-500">
+              <label for="completada-editar" class="text-sm font-medium text-gray-700">Completada</label>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button type="button" @click="mostrarModalEditarTarea = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+              <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Guardar Cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
 </template>
 
 <script>
@@ -157,6 +265,12 @@ export default {
         imagen: ""
       },
       proyectoSeleccionado: {},
+      tarea: {
+        proyecto_id: null,
+        nombre: "",
+        descripcion: "",
+        completada: false
+      },
       estados: {
         NI: "No Iniciado",
         EE: "En Ejecución",
@@ -164,30 +278,185 @@ export default {
       },
       proyectoEdit: false,
       mostrarModal: false,
-      mostrarDetalles: false
+      mostrarDetalles: false,
+      mostrarModalTarea: false, // <- Falta una coma aquí
+      tareaSeleccionada: {}, // La tarea actualmente seleccionada para editar
+      mostrarModalEditarTarea: false // Controla la visibilidad del modal de edición
     };
   },
+
   methods: {
-    obtenerProyectos() {
-      axios.get("http://localhost/GestionConstructora/backend/proyectos.php")
-        .then(response => {
-          if (Array.isArray(response.data)) {
-            this.proyectos = response.data;
-          } else {
-            console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
-          }
-        })
-        .catch(error => console.error("Error al obtener proyectos:", error));
+    
+
+
+
+    calcularPorcentajeAvance() {
+    const totalTareas = this.proyectoSeleccionado.tareas.length;
+    const tareasCompletadas = this.proyectoSeleccionado.tareas.filter(tarea => tarea.completada).length;
+    
+    if (totalTareas === 0) return 0; // Evitar división por cero
+    return Math.round((tareasCompletadas / totalTareas) * 100);
+  },
+
+  async eliminarTarea(tareaId) {
+    if (confirm("¿Estás seguro de que deseas eliminar esta tarea?")) {
+      try {
+        await axios.delete("http://localhost/GestionConstructora/backend/tareas.php", {
+          data: { tarea_id: tareaId },
+          headers: { "Content-Type": "application/json" },
+        });
+
+        // Eliminar la tarea de `proyectoSeleccionado.tareas` en el frontend
+        this.proyectoSeleccionado.tareas = this.proyectoSeleccionado.tareas.filter(
+          (tarea) => tarea.tarea_id !== tareaId
+        );
+
+        // Actualizar el porcentaje de avance en el backend y el frontend
+        await this.actualizarPorcentajeAvance(this.proyectoSeleccionado.proyecto_id);
+
+        // Refrescar la lista de proyectos en la página principal para reflejar el cambio
+        this.obtenerProyectos();
+        
+        console.log("Tarea eliminada y porcentaje de avance actualizado.");
+      } catch (error) {
+        console.error("Error al eliminar tarea:", error);
+      }
+    }
+  },
+  
+  async crearTarea() {
+  try {
+    const response = await axios.post("http://localhost/GestionConstructora/backend/tareas.php", this.tarea, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (response.data.message) {
+      console.log("Tarea creada:", response.data.message);
+
+      // Volver a cargar la lista de tareas para asegurarse de que está actualizada
+      await this.obtenerTareas(this.proyectoSeleccionado.proyecto_id);
+
+      // Actualizar el porcentaje de avance en el backend y en el frontend
+      await this.actualizarPorcentajeAvance(this.proyectoSeleccionado.proyecto_id);
+
+      // Cerrar el modal de creación y resetear el formulario
+      this.mostrarModalTarea = false;
+      this.resetTarea();
+    }
+  } catch (error) {
+    console.error("Error al crear tarea:", error);
+  }
+},
+
+
+
+
+  editarTarea(tarea) {
+  this.tareaSeleccionada = {
+    ...tarea,
+    completada: !!tarea.completada // Asegura que completada sea booleano
+  };
+  this.mostrarModalEditarTarea = true;
+},
+async actualizarTarea() {
+    try {
+      await axios.post("http://localhost/GestionConstructora/backend/tareas_proyecto.php", this.tareaSeleccionada);
+
+      // Encuentra y actualiza la tarea en `proyectoSeleccionado.tareas`
+      const index = this.proyectoSeleccionado.tareas.findIndex(
+        (t) => t.tarea_id === this.tareaSeleccionada.tarea_id
+      );
+      if (index !== -1) {
+        this.proyectoSeleccionado.tareas.splice(index, 1, { ...this.tareaSeleccionada });
+      }
+
+      // Actualizar el porcentaje de avance en la base de datos y en el frontend
+      await this.actualizarPorcentajeAvance(this.proyectoSeleccionado.proyecto_id);
+      
+      // Refrescar la lista de proyectos en la página principal
+      this.obtenerProyectos();
+
+      // Cerrar el modal de edición de tareas
+      this.mostrarModalEditarTarea = false;
+    } catch (error) {
+      console.error("Error al actualizar tarea:", error);
+    }
+  },
+
+ async actualizarPorcentajeAvance(proyectoId) {
+    try {
+      const response = await axios.put(`http://localhost/GestionConstructora/backend/proyectos.php?update_percentage=true&proyecto_id=${proyectoId}`);
+      console.log("Porcentaje de avance actualizado:", response.data.porcentaje_avance);
+
+      // Actualizar el valor en `proyectoSeleccionado` para reflejar en el modal y página principal
+      this.proyectoSeleccionado.porcentaje_avance = response.data.porcentaje_avance;
+    } catch (error) {
+      console.error("Error al actualizar el porcentaje de avance:", error);
+    }
+  },
+  obtenerProyectos() {
+    axios
+      .get("http://localhost/GestionConstructora/backend/proyectos.php")
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          this.proyectos = response.data;
+        } else {
+          console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
+        }
+      })
+      .catch((error) => console.error("Error al obtener proyectos:", error));
+  },
+
+ 
+
+
+obtenerTareas(proyecto_id) {
+    axios
+      .get(`http://localhost/GestionConstructora/backend/tareas_proyecto.php?proyecto_id=${proyecto_id}`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          this.proyectoSeleccionado.tareas = response.data;
+
+          // Llamar a actualizarPorcentajeAvance después de que las tareas se hayan cargado
+          this.actualizarPorcentajeAvance(this.proyectoSeleccionado.proyecto_id);
+        } else {
+          console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
+        }
+      })
+      .catch((error) => console.error("Error al obtener tareas:", error));
+  },
+
+ 
+
+    resetTarea() {
+      this.tarea = {
+        proyecto_id: null,
+        nombre: "",
+        descripcion: "",
+        completada: false
+      };
     },
+    
+    abrirModalTarea(proyectoId) {
+      this.tarea = {
+        proyecto_id: proyectoId,
+        nombre: "",
+        descripcion: "",
+        completada: false
+      };
+      this.mostrarModalTarea = true;
+    },
+   
     abrirModalCrear() {
       this.resetProyecto();
       this.proyectoEdit = false;
       this.mostrarModal = true;
     },
-    verDetalles(proyecto) {
-      this.proyectoSeleccionado = proyecto;
-      this.mostrarDetalles = true;
-    },
+  verDetalles(proyecto) {
+    this.proyectoSeleccionado = proyecto;
+    this.mostrarDetalles = true;
+    this.obtenerTareas(proyecto.proyecto_id); // Llama a obtenerTareas para cargar las tareas del proyecto
+  },
     cerrarDetalles() {
       this.mostrarDetalles = false;
       this.proyectoSeleccionado = {};
@@ -195,11 +464,12 @@ export default {
     onFileChange(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
-        this.proyecto.imagen = e.target.result.split(",")[1];
+      reader.onload = e => {
+        this.proyecto.imagen = e.target.result.split(",")[1]; // Base64 sin el prefijo
       };
       reader.readAsDataURL(file);
     },
+
     submitProyecto() {
       if (this.proyectoEdit) {
         this.actualizarProyecto();
@@ -208,7 +478,8 @@ export default {
       }
     },
     crearProyecto() {
-      axios.post("http://localhost/GestionConstructora/backend/proyectos.php", this.proyecto)
+      axios
+        .post("http://localhost/GestionConstructora/backend/proyectos.php", this.proyecto)
         .then(response => {
           console.log("Proyecto creado:", response.data);
           this.obtenerProyectos();
@@ -223,18 +494,34 @@ export default {
     },
     actualizarProyecto() {
       const datosProyecto = { ...this.proyecto };
+
+      // Asegurarse de que proyecto_id esté presente
+      datosProyecto.proyecto_id = this.proyecto.proyecto_id;
+
       if (!datosProyecto.imagen) delete datosProyecto.imagen;
-      axios.put("http://localhost/GestionConstructora/backend/proyectos.php", datosProyecto)
-        .then(response => {
+      
+      axios
+      .put("http://localhost/GestionConstructora/backend/proyectos.php", datosProyecto)
+      .then(response => {
+        if (response.data.error) {
+          alert("Error: " + response.data.error);
+        } else {
           console.log("Proyecto actualizado:", response.data);
           this.obtenerProyectos();
           this.cancelarEdicion();
-        })
-        .catch(error => console.error("Error al actualizar proyecto:", error));
+        }
+      })
+      .catch(error => {
+        console.error("Error al actualizar proyecto:", error);
+        alert("Ocurrió un error al actualizar el proyecto.");
+      });
+
     },
+
     eliminarProyecto(id) {
       if (confirm("¿Estás seguro de que deseas eliminar este proyecto?")) {
-        axios.delete("http://localhost/GestionConstructora/backend/proyectos.php", { data: { proyecto_id: id } })
+        axios
+          .delete("http://localhost/GestionConstructora/backend/proyectos.php", { data: { proyecto_id: id } })
           .then(response => {
             console.log("Proyecto eliminado:", response.data);
             this.obtenerProyectos();
@@ -267,8 +554,8 @@ export default {
       return estado === "NI"
         ? "bg-gray-200 text-gray-800"
         : estado === "EE"
-          ? "bg-yellow-200 text-yellow-800"
-          : "bg-green-200 text-green-800";
+        ? "bg-yellow-200 text-yellow-800"
+        : "bg-green-200 text-green-800";
     }
   },
   created() {
@@ -276,3 +563,13 @@ export default {
   }
 };
 </script>
+  <style scoped>
+    .modal-content {
+      max-height: calc(100vh - 100px); /* Ajusta el modal para que sea un poco más corto que la pantalla completa */
+      overflow-y: auto;
+    }
+    .tasks-scroll {
+      max-height: 12rem; /* Ajusta la altura máxima de la lista de tareas */
+      overflow-y: auto;
+    }
+  </style>

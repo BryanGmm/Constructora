@@ -76,6 +76,14 @@ if ($method == 'POST' && empty($action)) {
         $stmt->bind_param("sids", $data['nombre'], $data['puesto_id'], $data['salario'], $data['email']);
 
         if ($stmt->execute()) {
+            $empleado_id = $stmt->insert_id;  // Obtener el ID del empleado recién creado
+            if (isset($data['telefono']) && !empty($data['telefono'])) {
+                // Insertar el teléfono principal
+                $stmtTelefono = $conn->prepare("INSERT INTO telefonos_empleados (empleado_id, numero_telefono) VALUES (?, ?)");
+                $stmtTelefono->bind_param("is", $empleado_id, $data['telefono']);
+                $stmtTelefono->execute();
+                $stmtTelefono->close();
+            }
             echo json_encode(["message" => "Empleado creado exitosamente."]);
         } else {
             echo json_encode(["error" => "Error al crear empleado."]);

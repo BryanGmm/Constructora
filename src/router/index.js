@@ -7,6 +7,7 @@ import GestionMaquinaria from '../views/GestionMaquinaria.vue'
 import GestionProyectos from '../views/GestionProyectos.vue'
 import GestionClientes from '@/views/GestionClientes.vue'
 import LoginView from '@/views/LoginView.vue'
+import MateriaPrima from '@/views/MateriaPrima.vue'
 
 
 const routes = [
@@ -49,6 +50,11 @@ const routes = [
         path: 'gestion-clientes',
         name: 'gestionClientes',
         component: GestionClientes,
+      },
+      {
+        path: 'materiaPrima',
+        name: 'materiaPrima',
+        component: MateriaPrima,
       },
     ],
   },
