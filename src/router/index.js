@@ -6,11 +6,19 @@ import GestionEmpleados from '../views/GestionEmpleados.vue'
 import GestionMaquinaria from '../views/GestionMaquinaria.vue'
 import GestionProyectos from '../views/GestionProyectos.vue'
 import GestionClientes from '@/views/GestionClientes.vue'
+import LoginView from '@/views/LoginView.vue'
+
 
 const routes = [
   {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+  },
+  {
     path: '/',
     component: Dashboard, // El Dashboard será el contenedor
+    meta: { requiresAuth: true }, // Requiere autenticación
     children: [
       {
         path: '',
@@ -51,4 +59,17 @@ const router = createRouter({
   routes,
 })
 
-export default router
+// Verificación de autenticación en el guard de navegación
+router.beforeEach((to, from, next) => {
+  const usuarioAutenticado = localStorage.getItem("usuario") !== null;
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !usuarioAutenticado) {
+    next('/login');
+  } else if (to.name === 'login' && usuarioAutenticado) {
+    next('/');
+  } else {
+    next();
+  }
+});
+
+export default router;
