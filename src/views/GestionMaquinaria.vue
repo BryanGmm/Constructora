@@ -2,6 +2,25 @@
   <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Gestión de Maquinaria</h1>
 
+    <!-- Filtros de búsqueda -->
+    <div class="flex space-x-4 mb-4">
+      <input
+        v-model="filters.nombre"
+        type="text"
+        placeholder="Buscar por nombre"
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+      />
+      <select
+        v-model="filters.estado"
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+      >
+        <option value="">Todos los estados</option>
+        <option value="Disponible">Disponible</option>
+        <option value="En uso">En uso</option>
+        <option value="En mantenimiento">En mantenimiento</option>
+      </select>
+    </div>
+
     <!-- Botón para abrir el modal de Ingresar Maquinaria -->
     <button @click="openModal()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">
       Ingresar Maquinaria
@@ -68,7 +87,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in maquinarias" :key="item.maquinaria_id">
+        <tr v-for="item in filteredMaquinarias" :key="item.maquinaria_id">
           <td class="border px-4 py-2">{{ item.maquinaria_id }}</td>
           <td class="border px-4 py-2">{{ item.nombre }}</td>
           <td class="border px-4 py-2">{{ item.descripcion }}</td>
@@ -91,6 +110,10 @@ export default {
     return {
       showModal: false,
       maquinarias: [],
+      filters: {
+        nombre: '',
+        estado: ''
+      },
       form: {
         maquinaria_id: null,
         nombre: '',
@@ -101,6 +124,15 @@ export default {
         tipo: '',
       },
     };
+  },
+  computed: {
+    filteredMaquinarias() {
+      return this.maquinarias.filter((maquinaria) => {
+        const matchesNombre = maquinaria.nombre.toLowerCase().includes(this.filters.nombre.toLowerCase());
+        const matchesEstado = this.filters.estado === '' || maquinaria.estado === this.filters.estado;
+        return matchesNombre && matchesEstado;
+      });
+    },
   },
   methods: {
     async fetchMaquinarias() {
@@ -142,10 +174,10 @@ export default {
     },
     openModal() {
       this.showModal = true;
+      this.resetForm();
     },
     closeModal() {
       this.showModal = false;
-      this.resetForm();
     },
     resetForm() {
       this.form = {

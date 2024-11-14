@@ -22,6 +22,16 @@ if ($method == 'GET') {
 
     $clientes = [];
     while ($row = $result->fetch_assoc()) {
+        // Obtener teléfonos asociados al cliente
+        $cliente_id = $row['cliente_id'];
+        $telefonos_result = $conn->query("SELECT numero_telefono FROM telefonos_clientes WHERE cliente_id = $cliente_id");
+        
+        $telefonos = [];
+        while ($telefono_row = $telefonos_result->fetch_assoc()) {
+            $telefonos[] = $telefono_row['numero_telefono'];
+        }
+        
+        $row['telefonos'] = $telefonos; // Añadir los teléfonos al cliente
         $clientes[] = $row;
     }
 
@@ -31,18 +41,52 @@ if ($method == 'GET') {
 if ($method == 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (isset($data['nombre'], $data['direccion'], $data['email'])) {
-        $stmt = $conn->prepare("INSERT INTO clientes (nombre, direccion, email) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $data['nombre'], $data['direccion'], $data['email']);
+    if (isset($data['nombre'], $data['direccion'], $data['email'], $data['telefono'])) {
+        // Iniciar una transacción
+        $conn->begin_transaction();
+
+        try {
+            // Insertar en la tabla de clientes
+            $stmt = $conn->prepare("INSERT INTO clientes (nombre, direccion, email) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $data['nombre'], $data['direccion'], $data['email']);
+            $stmt->execute();
+            $cliente_id = $stmt->insert_id; // Obtener el ID del cliente recién creado
+            $stmt->close();
+
+            // Insertar el primer número de teléfono en la tabla `telefonos_clientes`
+            $stmt = $conn->prepare("INSERT INTO telefonos_clientes (cliente_id, numero_telefono) VALUES (?, ?)");
+            $stmt->bind_param("is", $cliente_id, $data['telefono']);
+            $stmt->execute();
+            $stmt->close();
+
+            // Confirmar la transacción
+            $conn->commit();
+            echo json_encode(["message" => "Cliente y teléfono creados exitosamente."]);
+        } catch (Exception $e) {
+            // En caso de error, revertir la transacción
+            $conn->rollback();
+            echo json_encode(["error" => "Error al crear cliente o teléfono."]);
+        }
+    } else {
+        echo json_encode(["error" => "Datos incompletos para crear cliente"]);
+    }
+}
+
+if ($method == 'POST' && isset($_GET['action']) && $_GET['action'] == 'add_phone') {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (isset($data['cliente_id'], $data['numero_telefono'])) {
+        $stmt = $conn->prepare("INSERT INTO telefonos_clientes (cliente_id, numero_telefono) VALUES (?, ?)");
+        $stmt->bind_param("is", $data['cliente_id'], $data['numero_telefono']);
 
         if ($stmt->execute()) {
-            echo json_encode(["message" => "Cliente creado exitosamente."]);
+            echo json_encode(["message" => "Número de teléfono agregado exitosamente."]);
         } else {
-            echo json_encode(["error" => "Error al crear cliente."]);
+            echo json_encode(["error" => "Error al agregar número de teléfono."]);
         }
         $stmt->close();
     } else {
-        echo json_encode(["error" => "Datos incompletos para crear cliente"]);
+        echo json_encode(["error" => "Datos incompletos para agregar teléfono"]);
     }
 }
 
@@ -69,15 +113,29 @@ if ($method == 'DELETE') {
     $cliente_id = $input['cliente_id'] ?? null;
 
     if ($cliente_id) {
-        $stmt = $conn->prepare("DELETE FROM clientes WHERE cliente_id = ?");
-        $stmt->bind_param("i", $cliente_id);
+        // Iniciar transacción
+        $conn->begin_transaction();
+        try {
+            // Primero, eliminar los teléfonos asociados al cliente
+            $stmt = $conn->prepare("DELETE FROM telefonos_clientes WHERE cliente_id = ?");
+            $stmt->bind_param("i", $cliente_id);
+            $stmt->execute();
+            $stmt->close();
 
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Cliente eliminado correctamente"]);
-        } else {
-            echo json_encode(["error" => "Error al eliminar cliente"]);
+            // Luego, eliminar el cliente
+            $stmt = $conn->prepare("DELETE FROM clientes WHERE cliente_id = ?");
+            $stmt->bind_param("i", $cliente_id);
+            $stmt->execute();
+            $stmt->close();
+
+            // Confirmar transacción
+            $conn->commit();
+            echo json_encode(["message" => "Cliente y teléfonos asociados eliminados correctamente"]);
+        } catch (Exception $e) {
+            // Revertir transacción en caso de error
+            $conn->rollback();
+            echo json_encode(["error" => "Error al eliminar cliente o teléfonos asociados"]);
         }
-        $stmt->close();
     } else {
         echo json_encode(["error" => "ID de cliente no proporcionado"]);
     }
