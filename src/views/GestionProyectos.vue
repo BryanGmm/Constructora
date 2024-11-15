@@ -154,25 +154,23 @@
       
       <!-- Lista de Tareas con botones de Editar y Eliminar -->
       <h3 class="mt-6 text-xl font-semibold text-gray-800">Tareas del Proyecto</h3>
-      <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
-        <ul>
-          <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
-            <div>
-              <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
-              <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
-                {{ tarea.completada ? 'Completada' : 'Incompleta' }}
-              </span>
-              <!-- Botón de Editar -->
-              <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
-              <!-- Botón de Eliminar -->
-              <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
-            </div>
-          </li>
-        </ul>
+<div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+  <ul>
+    <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+      <div>
+        <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
+        <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
       </div>
+      <div class="flex items-center space-x-2">
+        <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
+          {{ tarea.completada ? 'Completada' : 'Incompleta' }}
+        </span>
+        <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
+        <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+      </div>
+    </li>
+  </ul>
+</div>
 
      <!-- Lista de Maquinaria con botones de Eliminar -->
 <h3 class="mt-6 text-xl font-semibold text-gray-800">Maquinaria Asignada</h3>
@@ -206,9 +204,6 @@
     </div>
   </div>
 </div>
-
-
-
 
      <!-- Modal para crear tarea -->
     <div v-if="mostrarModalTarea" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -396,8 +391,14 @@ export default {
 },
 
 async asignarMaquinaria() {
+  // Validación para asegurarse de que todos los campos requeridos están completos
+  if (!this.maquinaria.proyecto_id || !this.maquinaria.maquinaria_id || !this.maquinaria.fecha_asignacion) {
+    alert("Por favor completa todos los campos requeridos para asignar maquinaria.");
+    return;
+  }
+
   try {
-    console.log("Asignando maquinaria:", this.maquinaria);
+    console.log("Asignando maquinaria:", this.maquinaria); // Verificación de datos antes de enviar
     const response = await axios.post("http://localhost/GestionConstructora/backend/proyectos_maquinaria.php", this.maquinaria, {
       headers: { "Content-Type": "application/json" },
     });
@@ -555,21 +556,19 @@ async actualizarTarea() {
       .catch((error) => console.error("Error al obtener proyectos:", error));
   },
 
-obtenerTareas(proyecto_id) {
-    axios
-      .get(`http://localhost/GestionConstructora/backend/tareas_proyecto.php?proyecto_id=${proyecto_id}`)
-      .then((response) => {
-        if (Array.isArray(response.data)) {
-          this.proyectoSeleccionado.tareas = response.data;
-
-          // Llamar a actualizarPorcentajeAvance después de que las tareas se hayan cargado
-          this.actualizarPorcentajeAvance(this.proyectoSeleccionado.proyecto_id);
-        } else {
-          console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
-        }
-      })
-      .catch((error) => console.error("Error al obtener tareas:", error));
-  },
+  obtenerTareas(proyecto_id) {
+  axios
+    .get(`http://localhost/GestionConstructora/backend/tareas_proyecto.php?proyecto_id=${proyecto_id}`)
+    .then((response) => {
+      console.log("Tareas recibidas:", response.data); // Verifica que las tareas se reciban correctamente
+      if (Array.isArray(response.data)) {
+        this.proyectoSeleccionado.tareas = response.data;
+      } else {
+        console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
+      }
+    })
+    .catch((error) => console.error("Error al obtener tareas:", error));
+},
     resetTarea() {
       this.tarea = {
         proyecto_id: null,
@@ -595,10 +594,11 @@ obtenerTareas(proyecto_id) {
       this.mostrarModal = true;
     },
     verDetalles(proyecto) {
-      this.proyectoSeleccionado = proyecto;
-      this.mostrarDetalles = true;
-      this.obtenerMaquinaria(proyecto.proyecto_id); // Llama a obtenerMaquinaria con el ID del proyecto seleccionado
-    },
+  this.proyectoSeleccionado = proyecto;
+  this.mostrarDetalles = true;
+  this.obtenerTareas(proyecto.proyecto_id); // Cargar las tareas del proyecto seleccionado
+  this.obtenerMaquinaria(proyecto.proyecto_id); // Cargar maquinaria asignada
+},
     cerrarDetalles() {
       this.mostrarDetalles = false;
       this.proyectoSeleccionado = {};

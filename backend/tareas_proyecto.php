@@ -16,19 +16,17 @@ if ($conn->connect_error) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($method === 'GET' && isset($_GET['proyecto_id'])) {
-    // Obtener tareas de un proyecto específico
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['proyecto_id'])) {
     $proyecto_id = $_GET['proyecto_id'];
-    
-    $query = "SELECT * FROM tareas_proyecto WHERE proyecto_id = ?";
-    $stmt = $conn->prepare($query);
+
+    $stmt = $conn->prepare("SELECT * FROM tareas_proyecto WHERE proyecto_id = ?");
     $stmt->bind_param("i", $proyecto_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $tareas = $result->fetch_all(MYSQLI_ASSOC);
 
     echo json_encode($tareas);
-
+    $stmt->close();
 } elseif ($method === 'POST') {
     // Actualizar una tarea específica
     $data = json_decode(file_get_contents("php://input"), true);

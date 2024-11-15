@@ -19,7 +19,6 @@ if ($conn->connect_error) {
 // Obtener el método de solicitud
 $method = $_SERVER['REQUEST_METHOD'];
 
-
 if ($method == 'GET') {
     // Obtener maquinaria asignada a un proyecto específico
     $proyecto_id = $_GET['proyecto_id'] ?? null;
@@ -63,6 +62,23 @@ if ($method == 'GET') {
             echo json_encode(["message" => "Maquinaria eliminada correctamente."]);
         } else {
             echo json_encode(["error" => "Error al eliminar maquinaria: " . $stmt->error]);
+        }
+        $stmt->close();
+    } 
+    // Manejo para asignar nueva maquinaria
+    elseif (isset($data['proyecto_id'], $data['maquinaria_id'], $data['fecha_asignacion'])) {
+        $proyecto_id = $data['proyecto_id'];
+        $maquinaria_id = $data['maquinaria_id'];
+        $fecha_asignacion = $data['fecha_asignacion'];
+        $fecha_liberacion = $data['fecha_liberacion'] ?? null;
+
+        $stmt = $conn->prepare("INSERT INTO proyectos_maquinaria (proyecto_id, maquinaria_id, fecha_asignacion, fecha_liberacion) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $proyecto_id, $maquinaria_id, $fecha_asignacion, $fecha_liberacion);
+
+        if ($stmt->execute()) {
+            echo json_encode(["message" => "Maquinaria asignada correctamente."]);
+        } else {
+            echo json_encode(["error" => "Error al asignar maquinaria: " . $stmt->error]);
         }
         $stmt->close();
     } else {
