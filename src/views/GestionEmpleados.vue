@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-gray-100 p-8">
     <div class="max-w-6xl mx-auto">
       <h2 class="text-3xl font-bold text-gray-800 mb-6">Gestión de Empleados</h2>
-      <button @click="abrirModalNuevoEmpleado"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out mb-8">
+      <button @click="abrirModalNuevoEmpleado" style="background-color: #2c3a4e;"
+        class="hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out mb-8">
         Agregar Empleado
       </button>
 
@@ -44,14 +44,20 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ empleado.telefonos ? empleado.telefonos.split(',')[0] : 'No registrado' }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button @click.stop="editarEmpleado(empleado)"
-                  class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                <button @click.stop="eliminarEmpleado(empleado.empleado_id)"
-                  class="text-red-600 hover:text-red-900 mr-3">Eliminar</button>
-                <button @click.stop="abrirModalTelefono(empleado.empleado_id)"
-                  class="text-green-600 hover:text-green-900">Añadir Teléfono</button>
-              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+    <button @click.stop="editarEmpleado(empleado)"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+        Editar
+    </button>
+    <button @click.stop="eliminarEmpleado(empleado.empleado_id)"
+            class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+        Eliminar
+    </button>
+    <button @click.stop="abrirModalTelefono(empleado.empleado_id)"
+            class="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+        Añadir Teléfono
+    </button>
+</td>
             </tr>
           </tbody>
         </table>

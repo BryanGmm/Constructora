@@ -112,76 +112,101 @@
       </div>
 
       <!-- Modal de Detalles del Proyecto -->
-      <div v-if="mostrarDetalles" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-          <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-gray-800">Detalles del Proyecto</h2>
-            <button @click="cerrarDetalles" class="text-gray-500 hover:text-gray-800">×</button>
-          </div>
+<div v-if="mostrarDetalles" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+      <h2 class="text-2xl font-semibold text-gray-800">Detalles del Proyecto</h2>
+      <button @click="cerrarDetalles" class="text-gray-500 hover:text-gray-800">×</button>
+    </div>
 
-          <!-- Contenedor desplazable -->
-          <div class="px-6 py-4 overflow-y-auto flex-1">
-            <img
-              v-if="proyectoSeleccionado.imagen"
-              :src="proyectoSeleccionado.imagen"
-              alt="Imagen del proyecto"
-              class="w-full h-64 object-cover rounded-lg mb-4"
-            />
-            <div v-else class="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500 mb-4">
-              <span>Sin Imagen</span>
-            </div>
-            
-            <!-- Barra de progreso debajo de la imagen -->
-            <div class="w-full bg-gray-200 rounded-full h-6 mb-4">
-              <div
-                class="bg-blue-600 h-6 rounded-full"
-                :style="{ width: `${proyectoSeleccionado.porcentaje_avance}%` }"
-              ></div>
-            </div>
-            <p class="text-center text-sm font-medium text-gray-700 mb-4">
-              {{ proyectoSeleccionado.porcentaje_avance }}%
-            </p>
-            
-            <!-- Detalles del proyecto -->
-            <p class="text-gray-600 mb-2"><strong>Nombre:</strong> {{ proyectoSeleccionado.nombre }}</p>
-            <p class="text-gray-600 mb-2"><strong>Descripción:</strong> {{ proyectoSeleccionado.descripcion }}</p>
-            <p class="text-gray-600 mb-2"><strong>Ubicación:</strong> {{ proyectoSeleccionado.ubicacion }}</p>
-            <p class="text-gray-600 mb-2"><strong>Fecha de Inicio:</strong> {{ proyectoSeleccionado.fecha_inicio }}</p>
-            <p class="text-gray-600 mb-2"><strong>Fecha de Fin:</strong> {{ proyectoSeleccionado.fecha_fin }}</p>
-            <p class="text-gray-600 mb-2"><strong>Inversión Inicial:</strong> {{ formatCurrency(proyectoSeleccionado.inversion_inicial) }}</p>
-            <p class="text-gray-600 mb-2"><strong>Inversión Final:</strong> {{ formatCurrency(proyectoSeleccionado.inversion_final) }}</p>
-            <p class="text-gray-600"><strong>Estado:</strong> <span :class="badgeClass(proyectoSeleccionado.estado)" class="px-2 py-1 rounded-full">{{ estados[proyectoSeleccionado.estado] }}</span></p>
-            
-             <!-- Lista de Tareas con botones de Editar y Eliminar -->
-              <h3 class="mt-6 text-xl font-semibold text-gray-800">Tareas del Proyecto</h3>
-              <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
-                <ul>
-                  <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
-                    <div>
-                      <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
-                      <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                      <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
-                        {{ tarea.completada ? 'Completada' : 'Incompleta' }}
-                      </span>
-                      <!-- Botón de Editar -->
-                      <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
-                      <!-- Botón de Eliminar -->
-                      <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-          </div>
-
-          <!-- Barra de botones que se mantiene fija -->
-          <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between">
-            <button @click="cerrarDetalles" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cerrar</button>
-            <button @click="abrirModalTarea(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Agregar Tarea</button>
-          </div>
-        </div>
+    <!-- Contenedor desplazable -->
+    <div class="px-6 py-4 overflow-y-auto flex-1">
+      <img
+        v-if="proyectoSeleccionado.imagen"
+        :src="proyectoSeleccionado.imagen"
+        alt="Imagen del proyecto"
+        class="w-full h-64 object-cover rounded-lg mb-4"
+      />
+      <div v-else class="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500 mb-4">
+        <span>Sin Imagen</span>
       </div>
+      
+      <!-- Barra de progreso debajo de la imagen -->
+      <div class="w-full bg-gray-200 rounded-full h-6 mb-4">
+        <div
+          class="bg-blue-600 h-6 rounded-full"
+          :style="{ width: `${proyectoSeleccionado.porcentaje_avance}%` }"
+        ></div>
+      </div>
+      <p class="text-center text-sm font-medium text-gray-700 mb-4">
+        {{ proyectoSeleccionado.porcentaje_avance }}%
+      </p>
+      
+      <!-- Detalles del proyecto -->
+      <p class="text-gray-600 mb-2"><strong>Nombre:</strong> {{ proyectoSeleccionado.nombre }}</p>
+      <p class="text-gray-600 mb-2"><strong>Descripción:</strong> {{ proyectoSeleccionado.descripcion }}</p>
+      <p class="text-gray-600 mb-2"><strong>Ubicación:</strong> {{ proyectoSeleccionado.ubicacion }}</p>
+      <p class="text-gray-600 mb-2"><strong>Fecha de Inicio:</strong> {{ proyectoSeleccionado.fecha_inicio }}</p>
+      <p class="text-gray-600 mb-2"><strong>Fecha de Fin:</strong> {{ proyectoSeleccionado.fecha_fin }}</p>
+      <p class="text-gray-600 mb-2"><strong>Inversión Inicial:</strong> {{ formatCurrency(proyectoSeleccionado.inversion_inicial) }}</p>
+      <p class="text-gray-600 mb-2"><strong>Inversión Final:</strong> {{ formatCurrency(proyectoSeleccionado.inversion_final) }}</p>
+      <p class="text-gray-600"><strong>Estado:</strong> <span :class="badgeClass(proyectoSeleccionado.estado)" class="px-2 py-1 rounded-full">{{ estados[proyectoSeleccionado.estado] }}</span></p>
+      
+      <!-- Lista de Tareas con botones de Editar y Eliminar -->
+      <h3 class="mt-6 text-xl font-semibold text-gray-800">Tareas del Proyecto</h3>
+      <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+        <ul>
+          <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
+              <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
+                {{ tarea.completada ? 'Completada' : 'Incompleta' }}
+              </span>
+              <!-- Botón de Editar -->
+              <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
+              <!-- Botón de Eliminar -->
+              <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+     <!-- Lista de Maquinaria con botones de Eliminar -->
+<h3 class="mt-6 text-xl font-semibold text-gray-800">Maquinaria Asignada</h3>
+<div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+  <ul>
+    <li v-for="item in proyectoSeleccionado.maquinaria" :key="item.maquinaria_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+      <div>
+        <p class="text-sm font-medium text-gray-900">{{ item.nombre }}</p>
+        <p class="text-sm text-gray-700">{{ item.descripcion }}</p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button @click="eliminarMaquinaria(item.proyecto_maquinaria_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<!-- Botón para asignar nueva maquinaria -->
+<button @click="abrirModalMaquinaria(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+  Asignar Maquinaria
+</button>
+  
+        </div>
+
+
+
+    <!-- Barra de botones que se mantiene fija -->
+    <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between">
+      <button @click="cerrarDetalles" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cerrar</button>
+      <button @click="abrirModalTarea(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Agregar Tarea</button>
+    </div>
+  </div>
+</div>
+
 
 
 
@@ -213,6 +238,39 @@
         </div>
       </div>
     </div>
+    <!-- Modal para Asignar Maquinaria -->
+<div v-if="mostrarModalMaquinaria" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+    <div class="border-b border-gray-200 px-6 py-4">
+      <h2 class="text-2xl font-semibold text-gray-800">Asignar Maquinaria</h2>
+    </div>
+    <div class="px-6 py-4">
+      <form @submit.prevent="asignarMaquinaria" class="space-y-4">
+        <div class="space-y-2">
+          <label for="maquinaria_id" class="block text-sm font-medium text-gray-700">Seleccionar Maquinaria</label>
+          <select v-model="maquinaria.maquinaria_id" id="maquinaria_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required>
+            <option value="" disabled>Seleccionar Maquinaria</option>
+            <option v-for="item in listaMaquinaria" :key="item.maquinaria_id" :value="item.maquinaria_id">
+              {{ item.nombre }}
+            </option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <label for="fecha_asignacion" class="block text-sm font-medium text-gray-700">Fecha de Asignación</label>
+          <input v-model="maquinaria.fecha_asignacion" type="date" id="fecha_asignacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+        </div>
+        <div class="space-y-2">
+          <label for="fecha_liberacion" class="block text-sm font-medium text-gray-700">Fecha de Liberación</label>
+          <input v-model="maquinaria.fecha_liberacion" type="date" id="fecha_liberacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" />
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button type="button" @click="mostrarModalMaquinaria = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Asignar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
     <!-- Modal para editar tarea -->
     <div v-if="mostrarModalEditarTarea" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
@@ -276,6 +334,15 @@ export default {
         EE: "En Ejecución",
         PF: "Proyecto Finalizado"
       },
+      maquinaria: {
+        proyecto_id: null,
+        maquinaria_id: null,
+        fecha_asignacion: new Date().toISOString().substr(0, 10), // Fecha actual
+        fecha_liberacion: ""
+      },
+      listaMaquinaria: [], // Aquí se guardará la maquinaria disponible
+      maquinariaSeleccionada: {}, // Maquinaria actualmente seleccionada para editar
+      mostrarModalMaquinaria: false, // Controla el modal de asignación de maquinaria
       proyectoEdit: false,
       mostrarModal: false,
       mostrarDetalles: false,
@@ -286,8 +353,94 @@ export default {
   },
 
   methods: {
-    
+    async obtenerMaquinariaDisponible() {
+    try {
+      const response = await axios.get("http://localhost/GestionConstructora/backend/maquinaria.php");
+      if (Array.isArray(response.data)) {
+        this.listaMaquinaria = response.data;
+      } else {
+        console.error("Error: la respuesta no es un array.", response.data);
+      }
+    } catch (error) {
+      console.error("Error al obtener maquinaria disponible:", error);
+    }
+  },
 
+
+  // Método para obtener maquinaria asignada a un proyecto
+  async obtenerMaquinaria(proyecto_id) {
+  try {
+    const response = await axios.get(`http://localhost/GestionConstructora/backend/proyectos_maquinaria.php?proyecto_id=${proyecto_id}`);
+    console.log("Respuesta del servidor para maquinaria:", response.data); // Verifica los datos aquí
+    if (Array.isArray(response.data)) {
+      this.proyectoSeleccionado.maquinaria = response.data;
+    } else {
+      console.error("Error: la respuesta no es un array.", response.data);
+    }
+  } catch (error) {
+    console.error("Error al obtener maquinaria:", error);
+  }
+},
+
+
+  abrirModalMaquinaria(proyectoId) {
+  console.log("Abriendo modal para proyecto ID:", proyectoId);
+  this.maquinaria = {
+    proyecto_id: proyectoId,
+    maquinaria_id: null,
+    fecha_asignacion: new Date().toISOString().substr(0, 10),
+    fecha_liberacion: ""
+  };
+  this.obtenerMaquinariaDisponible(); // Cargar maquinaria disponible
+  this.mostrarModalMaquinaria = true;
+},
+
+async asignarMaquinaria() {
+  try {
+    console.log("Asignando maquinaria:", this.maquinaria);
+    const response = await axios.post("http://localhost/GestionConstructora/backend/proyectos_maquinaria.php", this.maquinaria, {
+      headers: { "Content-Type": "application/json" },
+    });
+    
+    console.log("Respuesta del servidor:", response.data);
+    if (response.data.message) {
+      console.log("Maquinaria asignada correctamente");
+      this.obtenerMaquinaria(this.maquinaria.proyecto_id);
+      this.mostrarModalMaquinaria = false;
+    }
+  } catch (error) {
+    console.error("Error al asignar maquinaria:", error);
+  }
+},
+
+async eliminarMaquinaria(proyecto_maquinaria_id) {
+  if (confirm("¿Estás seguro de que deseas eliminar esta maquinaria?")) {
+    try {
+      const response = await axios.post(
+        "http://localhost/GestionConstructora/backend/proyectos_maquinaria.php",
+        {
+          proyecto_maquinaria_id: proyecto_maquinaria_id,
+          _method: "DELETE"
+        },
+        {
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+      console.log("Respuesta de eliminación:", response.data);
+
+      if (response.data.error) {
+        alert("Error: " + response.data.error);
+      } else {
+        // Actualiza la lista en el frontend
+        this.proyectoSeleccionado.maquinaria = this.proyectoSeleccionado.maquinaria.filter(
+          (item) => item.proyecto_maquinaria_id !== proyecto_maquinaria_id
+        );
+      }
+    } catch (error) {
+      console.error("Error al eliminar maquinaria:", error);
+    }
+  }
+},
 
 
     calcularPorcentajeAvance() {
@@ -297,7 +450,6 @@ export default {
     if (totalTareas === 0) return 0; // Evitar división por cero
     return Math.round((tareasCompletadas / totalTareas) * 100);
   },
-
   async eliminarTarea(tareaId) {
     if (confirm("¿Estás seguro de que deseas eliminar esta tarea?")) {
       try {
@@ -347,10 +499,6 @@ export default {
     console.error("Error al crear tarea:", error);
   }
 },
-
-
-
-
   editarTarea(tarea) {
   this.tareaSeleccionada = {
     ...tarea,
@@ -407,9 +555,6 @@ async actualizarTarea() {
       .catch((error) => console.error("Error al obtener proyectos:", error));
   },
 
- 
-
-
 obtenerTareas(proyecto_id) {
     axios
       .get(`http://localhost/GestionConstructora/backend/tareas_proyecto.php?proyecto_id=${proyecto_id}`)
@@ -425,9 +570,6 @@ obtenerTareas(proyecto_id) {
       })
       .catch((error) => console.error("Error al obtener tareas:", error));
   },
-
- 
-
     resetTarea() {
       this.tarea = {
         proyecto_id: null,
@@ -452,11 +594,11 @@ obtenerTareas(proyecto_id) {
       this.proyectoEdit = false;
       this.mostrarModal = true;
     },
-  verDetalles(proyecto) {
-    this.proyectoSeleccionado = proyecto;
-    this.mostrarDetalles = true;
-    this.obtenerTareas(proyecto.proyecto_id); // Llama a obtenerTareas para cargar las tareas del proyecto
-  },
+    verDetalles(proyecto) {
+      this.proyectoSeleccionado = proyecto;
+      this.mostrarDetalles = true;
+      this.obtenerMaquinaria(proyecto.proyecto_id); // Llama a obtenerMaquinaria con el ID del proyecto seleccionado
+    },
     cerrarDetalles() {
       this.mostrarDetalles = false;
       this.proyectoSeleccionado = {};

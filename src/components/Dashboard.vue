@@ -1,57 +1,62 @@
 <template>
-  <div class="dashboard-layout">
-    <nav class="navbar">
-      <ul class="navbar__menu">
-        <li class="navbar__item">
-          <router-link to="/" class="navbar__link">
-            <i data-feather="home"></i><span>Home</span>
+  <div class="flex h-screen bg-gray-100">
+    <!-- Sidebar Navigation -->
+    <nav :class="{'w-20': !isExpanded, 'w-64': isExpanded}" class="bg-gray-900 h-screen fixed transition-all duration-300 shadow-lg overflow-y-auto">
+      <!-- Toggle Button -->
+      <div @click="toggleMenu" class="absolute top-4 right-4 text-gray-400 cursor-pointer hover:text-gray-200 transition-transform duration-300 transform" :class="{'rotate-180': isExpanded}">
+        <i data-feather="chevron-right"></i>
+      </div>
+      
+      <!-- Menu Sections -->
+      <ul class="mt-16 space-y-6">
+        <!-- Home Section -->
+        <li class="px-4">
+          <h2 class="text-xs text-gray-500 uppercase mb-2">Home</h2>
+          <router-link to="/" class="flex items-center text-gray-400 hover:text-green-500 transition-colors duration-300 space-x-3 py-2 relative">
+            <i data-feather="home" class="icon-spacing"></i>
+            <span v-if="isExpanded" class="text-sm font-medium">Dashboard</span>
+            <!-- Tooltip for collapsed menu -->
+            <span v-else class="tooltip">Dashboard</span>
           </router-link>
         </li>
-        <li class="navbar__item">
-          <router-link to="/gestion-usuarios" class="navbar__link">
-            <i data-feather="user"></i><span>Gestión Usuarios</span>
-          </router-link>
-        </li>
-        <li class="navbar__item">
-          <router-link to="/gestion-empleados" class="navbar__link">
-            <i data-feather="user-check"></i><span>Gestión Empleados</span>
-          </router-link>
-        </li>
-        <li class="navbar__item">
-          <router-link to="/gestion-maquinaria" class="navbar__link">
-            <i data-feather="tool"></i><span>Gestión Maquinaria</span>
-          </router-link>
-        </li>
-        <li class="navbar__item">
-          <router-link to="/gestion-proyectos" class="navbar__link">
-            <i data-feather="briefcase"></i><span>Gestión Proyectos</span>
-          </router-link>
-        </li>
-        <li class="navbar__item">
-          <router-link to="/gestion-clientes" class="navbar__link">
-            <i data-feather="users"></i><span>Gestión Clientes</span>
-          </router-link>
-        </li>
-        <li class="navbar__item">
-          <router-link to="/materiaPrima" class="navbar__link">
-            <i data-feather="box"></i><span>Materia Prima</span>
-          </router-link>
+        
+        <!-- Gestión Section -->
+        <li class="px-4">
+          <h2 class="text-xs text-gray-500 uppercase mb-2">Gestión</h2>
+          <ul class="space-y-2">
+            <li v-for="item in menuItems" :key="item.text">
+              <router-link :to="item.link" class="flex items-center text-gray-400 hover:text-green-500 transition-colors duration-300 space-x-3 py-2 relative">
+                <i :data-feather="item.icon" class="icon-spacing"></i>
+                <span v-if="isExpanded" class="text-sm font-medium">{{ item.text }}</span>
+                <!-- Tooltip for collapsed menu -->
+                <span v-else class="tooltip">{{ item.text }}</span>
+              </router-link>
+            </li>
+          </ul>
         </li>
       </ul>
-      <div class="navbar__logout">
-        <a href="#" @click.prevent="logout" class="navbar__link">
-          <i data-feather="log-out"></i><span>Cerrar Sesión</span>
-        </a>
+
+      <!-- Logout Button -->
+      <div class="absolute bottom-6 w-full flex justify-center">
+        <button @click="logout" class="flex items-center w-full px-4 py-3 text-gray-400 hover:text-green-500 transition-colors duration-300 rounded-md relative">
+          <i data-feather="log-out" class="icon-spacing"></i>
+          <span v-if="isExpanded" class="text-sm font-medium">Cerrar Sesión</span>
+          <!-- Tooltip for collapsed menu -->
+          <span v-else class="tooltip">Cerrar Sesión</span>
+        </button>
       </div>
     </nav>
-    <div class="contenido">
+
+    <!-- Main Content -->
+    <div :class="{'ml-20': !isExpanded, 'ml-64': isExpanded}" class="flex-1 p-8 overflow-y-auto h-screen ml-64">
       <router-view /> <!-- Aquí se mostrarán las vistas cargadas -->
     </div>
   </div>
 </template>
 
+
 <script>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import feather from 'feather-icons';
 
@@ -59,11 +64,15 @@ export default {
   name: 'AppDashboard',
   setup() {
     const router = useRouter();
+    const isExpanded = ref(true); // Por defecto, menú expandido
+
+    const toggleMenu = () => {
+      isExpanded.value = !isExpanded.value;
+      feather.replace();
+    };
 
     const logout = () => {
-      // Eliminar datos del usuario almacenados (por ejemplo, en localStorage)
       localStorage.removeItem('usuario');
-      // Redirigir a la página de inicio de sesión
       router.push('/login');
     };
 
@@ -71,161 +80,64 @@ export default {
       feather.replace();
     });
 
+    // Menú original conservado
+    const menuItems = [
+      { text: 'Usuarios', link: '/gestion-usuarios', icon: 'user' },
+      { text: 'Empleados', link: '/gestion-empleados', icon: 'user-check' },
+      { text: 'Maquinaria', link: '/gestion-maquinaria', icon: 'tool' },
+      { text: 'Proyectos', link: '/gestion-proyectos', icon: 'briefcase' },
+      { text: 'Clientes', link: '/gestion-clientes', icon: 'users' },
+      { text: 'Materia Prima', link: '/materiaPrima', icon: 'box' },
+    ];
+
     return {
+      isExpanded,
+      toggleMenu,
       logout,
+      menuItems,
     };
   },
 };
 </script>
 
-<style lang="scss" scoped>
-$borderRadius: 10px;
-$spacer: 1rem;
-$primary: #c55151;
-$text: #6a778e;
-$linkHeight: $spacer * 3.5;
-$timing: 250ms;
-$transition: $timing ease all;
-
-.dashboard-layout {
-  display: flex;
-  min-height: 100vh;
+<style scoped>
+/* Sidebar width control and general styles */
+.bg-gray-900 {
+  background-color: #1f2937;
+}
+.text-gray-500 {
+  color: #6b7280;
+}
+.text-gray-400 {
+  color: #9ca3af;
+}
+.hover\:text-green-500:hover {
+  color: #10b981;
+}
+.rotate-180 {
+  transform: rotate(180deg);
 }
 
-.navbar {
-  width: 90px;
-  background: #040c25;
-  border-radius: $borderRadius;
-  padding: $spacer 0;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+/* Title styles for sections */
+h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-style: semibold;
 }
 
-.contenido {
-  flex: 1;
-  padding: $spacer * 2;
-  margin-left: 90px; // Reserva el espacio de la barra lateral
-  overflow-y: auto;
-  background: #ffffff;
-  border-radius: $borderRadius;
-  box-shadow: 0px 4px 8px rgb(179, 204, 231);
+/* Icon spacing adjustment */
+.icon-spacing {
+  margin-left: 6px; /* Ajusta este valor según lo necesario para separar los íconos del borde izquierdo */
 }
 
-.navbar__menu {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
-.navbar__item {
-  width: 100%;
-}
-
-.navbar__link {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: $linkHeight;
-  width: $spacer * 5.5;
-  color: $text;
-  transition: $transition;
-  border-radius: $borderRadius;
-
-  span {
-    position: absolute;
-    left: 100%;
-    transform: translate(-($spacer * 3));
-    margin-left: 1rem;
-    opacity: 0;
-    pointer-events: none;
-    color: $primary;
-    background: #040c25;
-    padding: $spacer * 0.75;
-    transition: $transition;
-    border-radius: $borderRadius * 1.75;
-  }
-
-  &:hover {
-    color: #c55151;
-    background-color: #10224e;
-  }
-
-  &:hover span {
-    opacity: 1;
-    transform: translate(0);
-  }
-}
-
-/* Botón de cerrar sesión */
-.navbar__logout {
-  width: 100%; /* Ocupa el ancho completo */
-  padding: $spacer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.navbar__logout .navbar__link {
-  width: $spacer * 5.5;
-  justify-content: center;
-  color: $text;
-
-  &:hover {
-    color: #c55151;
-    background-color: #10224e;
-  }
-}
-
-/* Media Query para dispositivos móviles */
-@media (max-width: 768px) {
-  .dashboard-layout {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .navbar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    flex-direction: row;
-    justify-content: flex-start;
-  }
-
-  .navbar__menu {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    flex-grow: 1;
-  }
-
-  .navbar__logout {
-    padding: 0;
-  }
-
-  .navbar__link {
-    width: auto;
-    flex: 1;
-    padding: $spacer;
-    span {
-      display: none;
-    }
-  }
-
-  .contenido {
-    margin-left: 0;
-    padding: $spacer;
-  }
+/* Show tooltip on hover */
+.router-link:hover .tooltip,
+button:hover .tooltip,
+.router-link:focus .tooltip,
+button:focus .tooltip {
+  opacity: 1;
 }
 </style>

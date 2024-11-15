@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-gray-100 p-8">
     <div class="max-w-6xl mx-auto">
       <h2 class="text-3xl font-bold text-gray-800 mb-6">Gestión de Clientes</h2>
-      <button @click="abrirModalNuevoCliente"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out mb-8">
+      <button @click="abrirModalNuevoCliente" style="background-color: #2c3a4e;"
+        class="text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out mb-8">
         Agregar Cliente
       </button>
 
@@ -13,34 +13,51 @@
       </div>
 
       <!-- Tabla de Clientes -->
-<div class="bg-white shadow-md rounded-lg overflow-hidden">
-  <table class="min-w-full divide-y divide-gray-200">
-    <thead class="bg-gray-50">
-      <tr>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dirección</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-      </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      <tr v-for="cliente in clientesFiltrados" :key="cliente.cliente_id" class="hover:bg-gray-50 transition-colors duration-200 cursor-pointer" @click="verCliente(cliente)">
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ cliente.nombre }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cliente.direccion }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cliente.email }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          {{ cliente.telefonos.length > 0 ? cliente.telefonos[0] : 'No registrado' }}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-          <button @click.stop="editarCliente(cliente)" class="text-blue-600 hover:text-blue-900 mr-3 transition-colors duration-200">Editar</button>
-          <button @click.stop="eliminarCliente(cliente.cliente_id)" class="text-red-600 hover:text-red-900 mr-3 transition-colors duration-200">Eliminar</button>
-          <button @click.stop="abrirModalTelefono(cliente.cliente_id)" class="text-green-600 hover:text-green-900 transition-colors duration-200">Añadir Teléfono</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+      <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nombre</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Dirección</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Teléfono</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="cliente in clientesFiltrados" :key="cliente.cliente_id"
+              class="hover:bg-gray-50 transition-colors duration-200 cursor-pointer" @click="verCliente(cliente)">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ cliente.nombre }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cliente.direccion }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cliente.email }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ cliente.telefonos.length > 0 ? cliente.telefonos[0] : 'No registrado' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                  <button @click.stop="editarCliente(cliente)"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    Editar
+                  </button>
+                  <button @click.stop="eliminarCliente(cliente.cliente_id)"
+                    class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    Eliminar
+                  </button>
+                  <button @click.stop="abrirModalTelefono(cliente.cliente_id)"
+                    class="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    Añadir Teléfono
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Modal para Crear/Editar Cliente -->
       <div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

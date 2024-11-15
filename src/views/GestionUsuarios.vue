@@ -3,7 +3,7 @@
         <h2 class="text-2xl font-semibold mb-4">Gestión de Usuarios</h2>
 
         <!-- Botón para abrir el modal de creación -->
-        <button @click="abrirModalCrear" class="bg-blue-600 text-white px-4 py-2 rounded-md mb-4">
+        <button @click="abrirModalCrear" style="background-color: #2c3a4e;" class="text-white font-semibold px-4 py-2 rounded-md mb-4">
             Agregar Usuario
         </button>
 
@@ -66,9 +66,13 @@
                         <td class="px-6 py-4 text-sm text-gray-700">{{ user.rol }}</td>
                         <td class="px-6 py-4 text-sm font-medium space-x-2">
                             <button @click="cargarUsuario(user)"
-                                class="text-blue-600 hover:text-blue-900">Editar</button>
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                                Editar
+                            </button>
                             <button @click="eliminarUsuario(user.usuario_id)"
-                                class="text-red-600 hover:text-red-900">Eliminar</button>
+                            class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                                Eliminar
+                            </button>
                         </td>
                     </tr>
                 </tbody>

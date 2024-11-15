@@ -2,8 +2,8 @@
     <div class="min-h-screen bg-gray-100 p-8">
       <div class="max-w-6xl mx-auto">
         <h2 class="text-3xl font-bold text-gray-800 mb-6">Gestión de Materia Prima</h2>
-        <button @click="abrirModalNuevaMateriaPrima"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out mb-8">
+        <button @click="abrirModalNuevaMateriaPrima" style="background-color: #2c3a4e;"
+          class="text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out mb-8">
           Agregar Materia Prima
         </button>
   
@@ -33,9 +33,15 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ material.cantidad_en_stock }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button @click.stop="editarMaterial(material)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Editar</button>
-                  <button @click.stop="eliminarMaterial(material.materia_prima_id)" class="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Eliminar</button>
-                </td>
+                <div class="flex space-x-2">
+                  <button @click.stop="editarMaterial(material)" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    Editar
+                  </button>
+                  <button @click.stop="eliminarMaterial(material.materia_prima_id)" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    Eliminar
+                  </button>
+                </div>
+              </td>
               </tr>
             </tbody>
           </table>

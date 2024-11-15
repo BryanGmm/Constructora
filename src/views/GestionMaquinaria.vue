@@ -22,7 +22,7 @@
     </div>
 
     <!-- Botón para abrir el modal de Ingresar Maquinaria -->
-    <button @click="openModal()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">
+    <button @click="openModal()" style="background-color: #2c3a4e;" class="text-white font-semibold px-4 py-2 rounded-md mb-4">
       Ingresar Maquinaria
     </button>
 
@@ -93,8 +93,12 @@
           <td class="border px-4 py-2">{{ item.descripcion }}</td>
           <td class="border px-4 py-2">{{ item.estado }}</td>
           <td class="border px-4 py-2">
-            <button @click="editMaquinaria(item)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Editar</button>
-            <button @click="deleteMaquinaria(item.maquinaria_id)" class="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Eliminar</button>
+            <button @click="editMaquinaria(item)" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+              Editar
+            </button>
+            <button @click="deleteMaquinaria(item.maquinaria_id)" class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+              Eliminar
+            </button>
           </td>
         </tr>
       </tbody>
