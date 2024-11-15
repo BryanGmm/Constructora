@@ -110,6 +110,43 @@
           </div>
         </div>
       </div>
+      <!-- Modal para Asignar Materia Prima -->
+      <div v-if="mostrarModalMateriaPrima" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[1000]">
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+          <div class="border-b border-gray-200 px-6 py-4">
+            <h2 class="text-2xl font-semibold text-gray-800">Asignar Materia Prima</h2>
+          </div>
+          <div class="px-6 py-4">
+            <form @submit.prevent="asignarMateriaPrima" class="space-y-4">
+              <div class="space-y-2">
+                <label for="materia_prima_id" class="block text-sm font-medium text-gray-700">Seleccionar Materia Prima</label>
+                <select v-model="materiaPrima.materia_prima_id" id="materia_prima_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required>
+                  <option value="" disabled>Seleccionar Materia Prima</option>
+                  <option v-for="item in listaMateriasPrimas" :key="item.materia_prima_id" :value="item.materia_prima_id">
+                    {{ item.nombre }}
+                  </option>
+                </select>
+              </div>
+              <div class="space-y-2">
+                <label for="cantidad_utilizada" class="block text-sm font-medium text-gray-700">Cantidad Utilizada</label>
+                <input v-model="materiaPrima.cantidad_utilizada" type="number" id="cantidad_utilizada" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+              </div>
+              <div class="space-y-2">
+                <label for="costo" class="block text-sm font-medium text-gray-700">Costo</label>
+                <input v-model="materiaPrima.costo" type="number" id="costo" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+              </div>
+              <div class="space-y-2">
+                <label for="fecha_utilizacion" class="block text-sm font-medium text-gray-700">Fecha de Utilización</label>
+                <input v-model="materiaPrima.fecha_utilizacion" type="date" id="fecha_utilizacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+              </div>
+              <div class="flex justify-end space-x-3">
+                <button type="button" @click="mostrarModalMateriaPrima = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Asignar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
 
       <!-- Modal de Detalles del Proyecto -->
 <div v-if="mostrarDetalles" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -211,13 +248,39 @@
         <p v-else class="text-sm text-gray-500">No hay empleados asignados.</p>
       </div>
 
-
-
-
       <!-- Botón para asignar nuevo empleado -->
       <button @click="abrirModalEmpleado(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
         Asignar Empleado
       </button>
+
+
+      <!-- Lista de Materia Prima con botones de Eliminar -->
+      <h3 class="mt-6 text-xl font-semibold text-gray-800">Materia Prima Asignada</h3>
+      <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+        <ul v-if="proyectoSeleccionado.materiasPrimas && proyectoSeleccionado.materiasPrimas.length > 0">
+          <li v-for="item in proyectoSeleccionado.materiasPrimas" :key="item.proyecto_materia_prima_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ item.nombre }}</p>
+              <p class="text-sm text-gray-700">Cantidad: {{ item.cantidad_utilizada }}</p>
+              <p class="text-sm text-gray-700">Costo: {{ item.costo }}</p>
+              <p class="text-sm text-gray-700">Fecha de Utilización: {{ item.fecha_utilizacion }}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button @click="eliminarMateriaPrima(item.proyecto_materia_prima_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="text-sm text-gray-500">No hay materias primas asignadas.</p>
+      </div>
+
+
+      <!-- Botón para asignar nueva materia prima -->
+      <button @click="abrirModalMateriaPrima(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+        Asignar Materia Prima
+      </button>
+
+
+      
     </div>
 
 
@@ -258,7 +321,7 @@
         </div>
       </div>
     </div>
-    <!-- Modal para Asignar Empleado -->
+   <!-- Modal para Asignar Empleado -->
     <div v-if="mostrarModalEmpleado" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
         <div class="border-b border-gray-200 px-6 py-4">
@@ -276,6 +339,10 @@
               </select>
             </div>
             <div class="space-y-2">
+              <label for="rol_en_proyecto" class="block text-sm font-medium text-gray-700">Rol en el Proyecto</label>
+              <input v-model="empleado.rol_en_proyecto" type="text" id="rol_en_proyecto" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+            </div>
+            <div class="space-y-2">
               <label for="fecha_asignacion" class="block text-sm font-medium text-gray-700">Fecha de Asignación</label>
               <input v-model="empleado.fecha_asignacion" type="date" id="fecha_asignacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
             </div>
@@ -291,6 +358,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- Modal para Asignar Maquinaria -->
     <div v-if="mostrarModalMaquinaria" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -402,6 +470,15 @@ export default {
         fecha_asignacion: new Date().toISOString().substr(0, 10),
         fecha_liberacion: ""
       },
+      materiaPrima: {
+        proyecto_id: null,
+        materia_prima_id: null,
+        cantidad_utilizada: null,
+        costo: null,
+        fecha_utilizacion: new Date().toISOString().substr(0, 10)
+      },
+      listaMateriasPrimas: [], // Lista de materias primas disponibles
+      mostrarModalMateriaPrima: false,
       listaEmpleados: [], // Lista de empleados disponibles
       mostrarModalEmpleado: false, // Controla el modal de asignación de empleados
       listaMaquinaria: [], // Aquí se guardará la maquinaria disponible
@@ -417,6 +494,121 @@ export default {
   },
 
   methods: {
+
+    // Método para abrir el modal de asignación de materia prima
+    abrirModalMateriaPrima(proyectoId) {
+      this.materiaPrima = {
+        proyecto_id: proyectoId,
+        materia_prima_id: null,
+        cantidad_utilizada: null,
+        costo: null,
+        fecha_utilizacion: new Date().toISOString().substr(0, 10)
+      };
+      this.obtenerMateriasPrimas(); // Cargar la lista de materias primas disponibles
+      this.mostrarModalMateriaPrima = true;
+    },
+
+
+    // Método para obtener la lista de materias primas
+    async obtenerMateriasPrimas() {
+      try {
+        const response = await axios.get("http://localhost/GestionConstructora/backend/materias_primas.php");
+        if (Array.isArray(response.data)) {
+          this.listaMateriasPrimas = response.data;
+          console.log("Materias primas cargadas:", this.listaMateriasPrimas); // Verifica los datos aquí
+        } else {
+          console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
+        }
+      } catch (error) {
+        console.error("Error al obtener materias primas:", error);
+      }
+    },
+
+    // Método para asignar materia prima
+    async asignarMateriaPrima() {
+      if (!this.materiaPrima.proyecto_id || !this.materiaPrima.materia_prima_id || !this.materiaPrima.cantidad_utilizada || !this.materiaPrima.costo) {
+        alert("Por favor completa todos los campos requeridos para asignar materia prima.");
+        return;
+      }
+
+      try {
+        const response = await axios.post("http://localhost/GestionConstructora/backend/proyectos_materia_prima.php", this.materiaPrima, {
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.data.message) {
+          console.log("Materia Prima asignada correctamente");
+
+          // Actualizar la lista de materias primas asignadas
+          this.obtenerMateriasPrimasAsignadas(this.materiaPrima.proyecto_id);
+
+          // Cerrar el modal y resetear el formulario
+          this.mostrarModalMateriaPrima = false;
+          this.materiaPrima = {
+            proyecto_id: null,
+            materia_prima_id: null,
+            cantidad_utilizada: null,
+            costo: null,
+            fecha_utilizacion: new Date().toISOString().substr(0, 10)
+          };
+        }
+      } catch (error) {
+        console.error("Error al asignar materia prima:", error);
+      }
+    },
+
+    // Método para obtener materias primas asignadas a un proyecto
+    async obtenerMateriasPrimasAsignadas(proyecto_id) {
+      try {
+        const response = await axios.get(`http://localhost/GestionConstructora/backend/proyectos_materia_prima.php?proyecto_id=${proyecto_id}`);
+        if (Array.isArray(response.data)) {
+          this.proyectoSeleccionado.materiasPrimas = response.data;
+          console.log("Materias primas asignadas:", this.proyectoSeleccionado.materiasPrimas); // Verifica los datos en la consola
+        } else {
+          console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
+        }
+      } catch (error) {
+        console.error("Error al obtener materias primas asignadas:", error);
+      }
+    },
+
+    // Método para eliminar materia prima
+    async eliminarMateriaPrima(proyecto_materia_prima_id) {
+      if (confirm("¿Estás seguro de que deseas eliminar esta materia prima?")) {
+        try {
+          const response = await axios.post(
+            "http://localhost/GestionConstructora/backend/proyectos_materia_prima.php",
+            {
+              proyecto_materia_prima_id: proyecto_materia_prima_id,
+              _method: "DELETE"
+            },
+            {
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+
+          if (response.data.message) {
+            console.log("Materia prima eliminada correctamente");
+            // Actualizar la lista de materias primas asignadas
+            this.obtenerMateriasPrimasAsignadas(this.proyectoSeleccionado.proyecto_id);
+          } else {
+            console.error("Error:", response.data.error);
+          }
+        } catch (error) {
+          console.error("Error al eliminar materia prima:", error);
+        }
+      }
+    },
+    cerrarModalMateriaPrima() {
+  this.mostrarModalMateriaPrima = false;
+  this.materiaPrima = {
+    proyecto_id: null,
+    materia_prima_id: null,
+    cantidad_utilizada: null,
+    costo: null,
+    fecha_utilizacion: new Date().toISOString().substr(0, 10)
+  };
+},
 
     async obtenerEmpleadosDisponibles() {
     try {
@@ -462,37 +654,36 @@ export default {
   },
 
   async asignarEmpleado() {
-  if (!this.empleado.proyecto_id || !this.empleado.empleado_id || !this.empleado.fecha_asignacion) {
-    alert("Por favor completa todos los campos requeridos para asignar un empleado.");
-    return;
-  }
-
-  try {
-    const response = await axios.post("http://localhost/GestionConstructora/backend/proyectos_empleados.php", this.empleado, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    console.log("Respuesta de la API al asignar empleado:", response.data); // <-- Verifica la respuesta aquí
-
-    if (response.data.message) {
-      console.log("Empleado asignado correctamente");
-
-      // Actualizar la lista de empleados asignados
-      await this.obtenerEmpleados(this.empleado.proyecto_id);
-
-      // Cerrar el modal y resetear el formulario
-      this.mostrarModalEmpleado = false;
-      this.empleado = {
-        proyecto_id: null,
-        empleado_id: null,
-        fecha_asignacion: new Date().toISOString().substr(0, 10),
-        fecha_liberacion: ""
-      };
+    if (!this.empleado.proyecto_id || !this.empleado.empleado_id || !this.empleado.fecha_asignacion || !this.empleado.rol_en_proyecto) {
+      alert("Por favor completa todos los campos requeridos para asignar un empleado.");
+      return;
     }
-  } catch (error) {
-    console.error("Error al asignar empleado:", error);
-  }
-},
+
+    try {
+      const response = await axios.post("http://localhost/GestionConstructora/backend/proyectos_empleados.php", this.empleado, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.data.message) {
+        console.log("Empleado asignado correctamente");
+
+        // Actualizar la lista de empleados asignados
+        this.obtenerEmpleados(this.empleado.proyecto_id);
+
+        // Cerrar el modal y resetear el formulario
+        this.mostrarModalEmpleado = false;
+        this.empleado = {
+          proyecto_id: null,
+          empleado_id: null,
+          fecha_asignacion: new Date().toISOString().substr(0, 10),
+          fecha_liberacion: "",
+          rol_en_proyecto: ""
+        };
+      }
+    } catch (error) {
+      console.error("Error al asignar empleado:", error);
+    }
+  },
 
 
   async eliminarEmpleado(proyecto_empleado_id) {
@@ -769,13 +960,14 @@ async actualizarTarea() {
       this.mostrarModal = true;
     },
     verDetalles(proyecto) {
-  this.proyectoSeleccionado = proyecto;
-  this.mostrarDetalles = true;
-  console.log("Proyecto seleccionado:", proyecto); // Verifica el proyecto
-  this.obtenerTareas(proyecto.proyecto_id);
-  this.obtenerMaquinaria(proyecto.proyecto_id);
-  this.obtenerEmpleados(proyecto.proyecto_id); // Cargar empleados asignados
-},
+      this.proyectoSeleccionado = proyecto;
+      this.mostrarDetalles = true;
+      this.obtenerTareas(proyecto.proyecto_id); // Cargar las tareas del proyecto seleccionado
+      this.obtenerMaquinaria(proyecto.proyecto_id); // Cargar maquinaria asignada
+      this.obtenerEmpleados(proyecto.proyecto_id); // Cargar empleados asignados
+      this.obtenerMateriasPrimasAsignadas(proyecto.proyecto_id); // Cargar materias primas asignadas
+    },
+
 
 
     cerrarDetalles() {
