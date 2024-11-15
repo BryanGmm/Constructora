@@ -15,7 +15,8 @@
 
       <!-- Tabla de Empleados -->
       <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto overflow-y-auto" style="max-height: 400px;">
+          <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -45,22 +46,23 @@
                 {{ empleado.telefonos ? empleado.telefonos.split(',')[0] : 'No registrado' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-    <button @click.stop="editarEmpleado(empleado)"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-        Editar
-    </button>
-    <button @click.stop="eliminarEmpleado(empleado.empleado_id)"
-            class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-        Eliminar
-    </button>
-    <button @click.stop="abrirModalTelefono(empleado.empleado_id)"
-            class="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-        Añadir Teléfono
-    </button>
-</td>
+                <button @click.stop="editarEmpleado(empleado)"
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                  Editar
+                </button>
+                <button @click.stop="eliminarEmpleado(empleado.empleado_id)"
+                  class="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                  Eliminar
+                </button>
+                <button @click.stop="abrirModalTelefono(empleado.empleado_id)"
+                  class="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                  Añadir Teléfono
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
       <!-- Modal para Crear/Editar Empleado -->
@@ -286,14 +288,14 @@ export default {
       this.mostrarModal = false;
     },
     crearEmpleado() {
-  axios.post('http://localhost/GestionConstructora/backend/empleados.php', this.empleadoData)
-    .then(response => {
-      console.log("Empleado creado:", response.data);
-      this.obtenerEmpleados();
-      this.resetFormulario();
-    })
-    .catch(error => console.error("Error al crear empleado:", error));
-},
+      axios.post('http://localhost/GestionConstructora/backend/empleados.php', this.empleadoData)
+        .then(response => {
+          console.log("Empleado creado:", response.data);
+          this.obtenerEmpleados();
+          this.resetFormulario();
+        })
+        .catch(error => console.error("Error al crear empleado:", error));
+    },
     editarEmpleado(empleado) {
       this.empleadoData = { ...empleado, telefono: '' };
       this.empleadoEdit = true;

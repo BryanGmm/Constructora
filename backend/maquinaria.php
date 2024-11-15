@@ -29,6 +29,7 @@ $db = $database->getConnection();
 
 // Leer el método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
 
 // Decodificar JSON en caso de recibir datos
 $data = json_decode(file_get_contents("php://input"));
@@ -51,14 +52,23 @@ switch ($method) {
         break;
 
     case 'GET':
-        // READ - Obtener todos los registros o uno en específico
-        if (isset($_GET['maquinaria_id'])) {
+        // READ - Obtener todos los registros, uno específico, o el conteo total
+        if ($action == 'count') {
+            // Obtener el conteo total de registros en maquinaria
+            $query = "SELECT COUNT(*) as total FROM maquinaria";
+            $stmt = $db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            echo json_encode($result ? $result : ["message" => "Error al contar registros."]);
+        } elseif (isset($_GET['maquinaria_id'])) {
+            // Obtener un registro específico
             $query = "SELECT * FROM maquinaria WHERE maquinaria_id = ?";
             $stmt = $db->prepare($query);
             $stmt->execute([$_GET['maquinaria_id']]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             echo json_encode($result ? $result : ["message" => "Registro no encontrado."]);
         } else {
+            // Obtener todos los registros
             $query = "SELECT * FROM maquinaria";
             $stmt = $db->prepare($query);
             $stmt->execute();

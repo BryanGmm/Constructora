@@ -18,18 +18,30 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
 if ($method == 'GET') {
-    $sql = "SELECT e.*, GROUP_CONCAT(t.numero_telefono) AS telefonos
-            FROM empleados e
-            LEFT JOIN telefonos_empleados t ON e.empleado_id = t.empleado_id
-            GROUP BY e.empleado_id";
-    $result = $conn->query($sql);
+    if ($action == 'count') {
+        // Devolver solo el total de empleados
+        $result = $conn->query("SELECT COUNT(*) as total FROM empleados");
+        if ($result) {
+            $row = $result->fetch_assoc();
+            echo json_encode(["total" => $row['total']]);
+        } else {
+            echo json_encode(["error" => "Error al contar los empleados."]);
+        }
+    } else {
+        // Consulta optimizada para obtener empleados y sus teléfonos en una sola operación
+        $sql = "SELECT e.*, GROUP_CONCAT(t.numero_telefono) AS telefonos
+                FROM empleados e
+                LEFT JOIN telefonos_empleados t ON e.empleado_id = t.empleado_id
+                GROUP BY e.empleado_id";
+        $result = $conn->query($sql);
 
-    $empleados = [];
-    while ($row = $result->fetch_assoc()) {
-        $empleados[] = $row;
+        $empleados = [];
+        while ($row = $result->fetch_assoc()) {
+            $empleados[] = $row;
+        }
+
+        echo json_encode($empleados);
     }
-
-    echo json_encode($empleados);
 }
 
 if ($method == 'POST' && $action == 'add_phone') {

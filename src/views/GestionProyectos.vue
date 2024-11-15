@@ -154,46 +154,71 @@
       
       <!-- Lista de Tareas con botones de Editar y Eliminar -->
       <h3 class="mt-6 text-xl font-semibold text-gray-800">Tareas del Proyecto</h3>
-<div class="mt-4 max-h-48 overflow-y-auto space-y-2">
-  <ul>
-    <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
-      <div>
-        <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
-        <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
+      <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+        <ul>
+          <li v-for="tarea in proyectoSeleccionado.tareas" :key="tarea.tarea_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ tarea.nombre }}</p>
+              <p class="text-sm text-gray-700">{{ tarea.descripcion }}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
+                {{ tarea.completada ? 'Completada' : 'Incompleta' }}
+              </span>
+              <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
+              <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+            </div>
+          </li>
+        </ul>
       </div>
-      <div class="flex items-center space-x-2">
-        <span :class="tarea.completada ? 'text-green-500' : 'text-red-500'">
-          {{ tarea.completada ? 'Completada' : 'Incompleta' }}
-        </span>
-        <button @click="editarTarea(tarea)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Editar</button>
-        <button @click="eliminarTarea(tarea.tarea_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
-      </div>
-    </li>
-  </ul>
-</div>
 
      <!-- Lista de Maquinaria con botones de Eliminar -->
-<h3 class="mt-6 text-xl font-semibold text-gray-800">Maquinaria Asignada</h3>
-<div class="mt-4 max-h-48 overflow-y-auto space-y-2">
-  <ul>
-    <li v-for="item in proyectoSeleccionado.maquinaria" :key="item.maquinaria_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
-      <div>
-        <p class="text-sm font-medium text-gray-900">{{ item.nombre }}</p>
-        <p class="text-sm text-gray-700">{{ item.descripcion }}</p>
+      <h3 class="mt-6 text-xl font-semibold text-gray-800">Maquinaria Asignada</h3>
+      <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+        <ul>
+          <li v-for="item in proyectoSeleccionado.maquinaria" :key="item.maquinaria_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ item.nombre }}</p>
+              <p class="text-sm text-gray-700">{{ item.descripcion }}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button @click="eliminarMaquinaria(item.proyecto_maquinaria_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+            </div>
+          </li>
+        </ul>
       </div>
-      <div class="flex items-center space-x-2">
-        <button @click="eliminarMaquinaria(item.proyecto_maquinaria_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
-      </div>
-    </li>
-  </ul>
-</div>
 
-<!-- Botón para asignar nueva maquinaria -->
-<button @click="abrirModalMaquinaria(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-  Asignar Maquinaria
-</button>
-  
-        </div>
+      <!-- Botón para asignar nueva maquinaria -->
+      <button @click="abrirModalMaquinaria(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+        Asignar Maquinaria
+      </button>
+      
+      <!-- Lista de Empleados con botones de Eliminar -->
+      <h3 class="mt-6 text-xl font-semibold text-gray-800">Empleados Asignados</h3>
+      <div class="mt-4 max-h-48 overflow-y-auto space-y-2">
+        <ul v-if="proyectoSeleccionado.empleados && proyectoSeleccionado.empleados.length > 0">
+          <li v-for="item in proyectoSeleccionado.empleados" :key="item.proyecto_empleado_id" class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ item.nombre }}</p>
+              <p class="text-sm text-gray-700">{{ item.cargo }}</p>
+              <p class="text-sm text-gray-700">Rol: {{ item.rol_en_proyecto }}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button @click="eliminarEmpleado(item.proyecto_empleado_id)" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="text-sm text-gray-500">No hay empleados asignados.</p>
+      </div>
+
+
+
+
+      <!-- Botón para asignar nuevo empleado -->
+      <button @click="abrirModalEmpleado(proyectoSeleccionado.proyecto_id)" class="px-4 py-2 mt-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+        Asignar Empleado
+      </button>
+    </div>
 
 
 
@@ -233,39 +258,75 @@
         </div>
       </div>
     </div>
+    <!-- Modal para Asignar Empleado -->
+    <div v-if="mostrarModalEmpleado" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Asignar Empleado</h2>
+        </div>
+        <div class="px-6 py-4">
+          <form @submit.prevent="asignarEmpleado" class="space-y-4">
+            <div class="space-y-2">
+              <label for="empleado_id" class="block text-sm font-medium text-gray-700">Seleccionar Empleado</label>
+              <select v-model="empleado.empleado_id" id="empleado_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required>
+                <option value="" disabled>Seleccionar Empleado</option>
+                <option v-for="item in listaEmpleados" :key="item.empleado_id" :value="item.empleado_id">
+                  {{ item.nombre }}
+                </option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label for="fecha_asignacion" class="block text-sm font-medium text-gray-700">Fecha de Asignación</label>
+              <input v-model="empleado.fecha_asignacion" type="date" id="fecha_asignacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+            </div>
+            <div class="space-y-2">
+              <label for="fecha_liberacion" class="block text-sm font-medium text-gray-700">Fecha de Liberación</label>
+              <input v-model="empleado.fecha_liberacion" type="date" id="fecha_liberacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" />
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button type="button" @click="mostrarModalEmpleado = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+              <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Asignar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal para Asignar Maquinaria -->
-<div v-if="mostrarModalMaquinaria" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-  <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
-    <div class="border-b border-gray-200 px-6 py-4">
-      <h2 class="text-2xl font-semibold text-gray-800">Asignar Maquinaria</h2>
-    </div>
-    <div class="px-6 py-4">
-      <form @submit.prevent="asignarMaquinaria" class="space-y-4">
-        <div class="space-y-2">
-          <label for="maquinaria_id" class="block text-sm font-medium text-gray-700">Seleccionar Maquinaria</label>
-          <select v-model="maquinaria.maquinaria_id" id="maquinaria_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required>
-            <option value="" disabled>Seleccionar Maquinaria</option>
-            <option v-for="item in listaMaquinaria" :key="item.maquinaria_id" :value="item.maquinaria_id">
-              {{ item.nombre }}
-            </option>
-          </select>
+    <div v-if="mostrarModalMaquinaria" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Asignar Maquinaria</h2>
         </div>
-        <div class="space-y-2">
-          <label for="fecha_asignacion" class="block text-sm font-medium text-gray-700">Fecha de Asignación</label>
-          <input v-model="maquinaria.fecha_asignacion" type="date" id="fecha_asignacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+        <div class="px-6 py-4">
+          <form @submit.prevent="asignarMaquinaria" class="space-y-4">
+            <div class="space-y-2">
+              <label for="maquinaria_id" class="block text-sm font-medium text-gray-700">Seleccionar Maquinaria</label>
+              <select v-model="maquinaria.maquinaria_id" id="maquinaria_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required>
+                <option value="" disabled>Seleccionar Maquinaria</option>
+                <option v-for="item in listaMaquinaria" :key="item.maquinaria_id" :value="item.maquinaria_id">
+                  {{ item.nombre }}
+                </option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label for="fecha_asignacion" class="block text-sm font-medium text-gray-700">Fecha de Asignación</label>
+              <input v-model="maquinaria.fecha_asignacion" type="date" id="fecha_asignacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" required />
+            </div>
+            <div class="space-y-2">
+              <label for="fecha_liberacion" class="block text-sm font-medium text-gray-700">Fecha de Liberación</label>
+              <input v-model="maquinaria.fecha_liberacion" type="date" id="fecha_liberacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" />
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button type="button" @click="mostrarModalMaquinaria = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+              <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Asignar</button>
+            </div>
+          </form>
         </div>
-        <div class="space-y-2">
-          <label for="fecha_liberacion" class="block text-sm font-medium text-gray-700">Fecha de Liberación</label>
-          <input v-model="maquinaria.fecha_liberacion" type="date" id="fecha_liberacion" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" />
-        </div>
-        <div class="flex justify-end space-x-3">
-          <button type="button" @click="mostrarModalMaquinaria = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Asignar</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      </div>
 </div>
+
+
     <!-- Modal para editar tarea -->
     <div v-if="mostrarModalEditarTarea" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md">
@@ -335,6 +396,14 @@ export default {
         fecha_asignacion: new Date().toISOString().substr(0, 10), // Fecha actual
         fecha_liberacion: ""
       },
+      empleado: {
+        proyecto_id: null,
+        empleado_id: null,
+        fecha_asignacion: new Date().toISOString().substr(0, 10),
+        fecha_liberacion: ""
+      },
+      listaEmpleados: [], // Lista de empleados disponibles
+      mostrarModalEmpleado: false, // Controla el modal de asignación de empleados
       listaMaquinaria: [], // Aquí se guardará la maquinaria disponible
       maquinariaSeleccionada: {}, // Maquinaria actualmente seleccionada para editar
       mostrarModalMaquinaria: false, // Controla el modal de asignación de maquinaria
@@ -348,6 +417,112 @@ export default {
   },
 
   methods: {
+
+    async obtenerEmpleadosDisponibles() {
+    try {
+      const response = await axios.get("http://localhost/GestionConstructora/backend/empleados.php");
+      if (Array.isArray(response.data)) {
+        this.listaEmpleados = response.data;
+      } else {
+        console.error("Error: la respuesta no es un array.", response.data);
+      }
+    } catch (error) {
+      console.error("Error al obtener empleados disponibles:", error);
+    }
+  },
+
+  // Método para obtener empleados asignados a un proyecto
+  async obtenerEmpleados(proyecto_id) {
+  try {
+    const response = await axios.get(`http://localhost/GestionConstructora/backend/proyectos_empleados.php?proyecto_id=${proyecto_id}`);
+    if (Array.isArray(response.data)) {
+      // Forzar la reactividad de Vue al actualizar `proyectoSeleccionado`
+      this.proyectoSeleccionado = {
+        ...this.proyectoSeleccionado,
+        empleados: response.data
+      };
+    } else {
+      console.error("Error: Se esperaba un array en response.data, pero se recibió:", response.data);
+    }
+  } catch (error) {
+    console.error("Error al obtener empleados:", error);
+  }
+},
+
+
+  abrirModalEmpleado(proyectoId) {
+    this.empleado = {
+      proyecto_id: proyectoId,
+      empleado_id: null,
+      fecha_asignacion: new Date().toISOString().substr(0, 10),
+      fecha_liberacion: ""
+    };
+    this.obtenerEmpleadosDisponibles(); // Cargar empleados disponibles
+    this.mostrarModalEmpleado = true;
+  },
+
+  async asignarEmpleado() {
+  if (!this.empleado.proyecto_id || !this.empleado.empleado_id || !this.empleado.fecha_asignacion) {
+    alert("Por favor completa todos los campos requeridos para asignar un empleado.");
+    return;
+  }
+
+  try {
+    const response = await axios.post("http://localhost/GestionConstructora/backend/proyectos_empleados.php", this.empleado, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    console.log("Respuesta de la API al asignar empleado:", response.data); // <-- Verifica la respuesta aquí
+
+    if (response.data.message) {
+      console.log("Empleado asignado correctamente");
+
+      // Actualizar la lista de empleados asignados
+      await this.obtenerEmpleados(this.empleado.proyecto_id);
+
+      // Cerrar el modal y resetear el formulario
+      this.mostrarModalEmpleado = false;
+      this.empleado = {
+        proyecto_id: null,
+        empleado_id: null,
+        fecha_asignacion: new Date().toISOString().substr(0, 10),
+        fecha_liberacion: ""
+      };
+    }
+  } catch (error) {
+    console.error("Error al asignar empleado:", error);
+  }
+},
+
+
+  async eliminarEmpleado(proyecto_empleado_id) {
+    if (confirm("¿Estás seguro de que deseas eliminar este empleado del proyecto?")) {
+      try {
+        const response = await axios.post(
+          "http://localhost/GestionConstructora/backend/proyectos_empleados.php",
+          {
+            proyecto_empleado_id: proyecto_empleado_id,
+            _method: "DELETE"
+          },
+          {
+            headers: { "Content-Type": "application/json" }
+          }
+        );
+
+        if (response.data.error) {
+          alert("Error: " + response.data.error);
+        } else {
+          // Actualiza la lista en el frontend
+          this.proyectoSeleccionado.empleados = this.proyectoSeleccionado.empleados.filter(
+            (item) => item.proyecto_empleado_id !== proyecto_empleado_id
+          );
+        }
+      } catch (error) {
+        console.error("Error al eliminar empleado:", error);
+      }
+    }
+  },
+
     async obtenerMaquinariaDisponible() {
     try {
       const response = await axios.get("http://localhost/GestionConstructora/backend/maquinaria.php");
@@ -596,9 +771,13 @@ async actualizarTarea() {
     verDetalles(proyecto) {
   this.proyectoSeleccionado = proyecto;
   this.mostrarDetalles = true;
-  this.obtenerTareas(proyecto.proyecto_id); // Cargar las tareas del proyecto seleccionado
-  this.obtenerMaquinaria(proyecto.proyecto_id); // Cargar maquinaria asignada
+  console.log("Proyecto seleccionado:", proyecto); // Verifica el proyecto
+  this.obtenerTareas(proyecto.proyecto_id);
+  this.obtenerMaquinaria(proyecto.proyecto_id);
+  this.obtenerEmpleados(proyecto.proyecto_id); // Cargar empleados asignados
 },
+
+
     cerrarDetalles() {
       this.mostrarDetalles = false;
       this.proyectoSeleccionado = {};

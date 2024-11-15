@@ -64,6 +64,53 @@
         </table>
       </div>
     </div>
+
+    <!-- Modal para ingresar o editar maquinaria -->
+    <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+        <h2 class="text-lg font-bold mb-4">{{ form.maquinaria_id ? 'Editar Maquinaria' : 'Ingresar Maquinaria' }}</h2>
+        <form @submit.prevent="submitForm">
+          <div class="mb-4">
+            <label class="block text-gray-700">Nombre</label>
+            <input v-model="form.nombre" type="text" required
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Descripción</label>
+            <textarea v-model="form.descripcion"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Estado</label>
+            <select v-model="form.estado"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+              <option value="Disponible">Disponible</option>
+              <option value="En uso">En uso</option>
+              <option value="En mantenimiento">En mantenimiento</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Fecha de Adquisición</label>
+            <input v-model="form.fecha_adquisicion" type="date"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Costo</label>
+            <input v-model="form.costo" type="number" step="0.01"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Tipo</label>
+            <input v-model="form.tipo" type="text"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+          </div>
+          <div class="flex justify-end">
+            <button @click="closeModal" type="button" class="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">Cancelar</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
