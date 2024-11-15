@@ -141,6 +141,9 @@ export default {
             this.resetFormulario();
         },
         submitForm() {
+            if (!this.validarUsuario()) {
+                return; // Si la validación falla, no continuar
+            }
             if (this.modoEdicion) {
                 this.actualizarUsuario();
             } else {
@@ -152,7 +155,7 @@ export default {
                 .then((response) => {
                     if (response.data.message) {
                         this.mostrarMensaje(response.data.message);
-                        this.obtenerUsuarios(); // Volver a cargar la lista de usuarios, para que el nuevo usuario con rol aparezca
+                        this.obtenerUsuarios(); // Volver a cargar la lista de usuarios
                         this.cerrarModal();
                     } else if (response.data.error) {
                         this.mostrarMensaje(response.data.error);
@@ -205,6 +208,30 @@ export default {
         resetFormulario() {
             this.usuario = { nombre: "", username: "", email: "", password: "", rol_id: null };
             this.modoEdicion = false;
+        },
+        validarUsuario() {
+            if (
+                !this.usuario.nombre ||
+                !this.usuario.username ||
+                !this.usuario.email ||
+                (!this.modoEdicion && !this.usuario.password) || // No se requiere contraseña al editar
+                !this.usuario.rol_id
+            ) {
+                this.mostrarMensaje("Todos los campos son obligatorios.");
+                return false;
+            }
+
+            if (!/[a-zA-Z]/.test(this.usuario.username) || !isNaN(this.usuario.username)) {
+                this.mostrarMensaje("El username debe contener letras y no puede ser solo números.");
+                return false;
+            }
+
+            if (!this.modoEdicion && this.usuario.password.length < 8) {
+                this.mostrarMensaje("La contraseña debe tener al menos 8 caracteres.");
+                return false;
+            }
+
+            return true;
         },
     },
     created() {
